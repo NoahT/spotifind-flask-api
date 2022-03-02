@@ -1,16 +1,15 @@
-# Branching Strategy (GitHub flow)
-This document briefly outlines [GitHub flow](https://docs.github.com/en/get-started/quickstart/github-flow), which is the branching strategy chosen for this project. Our branching strategy determines the manner in which we will make and merge changes to this project with Git version control.
+# Release Strategy (Blue Green)
+This document briefly outlines the release strategy, or how deployments should be orchestrated for our API. For our release strategy, we chose blue green deployments.
 
-## GitHub flow
-GitHub flow is a lightweight and simplified version control model. The overarching idea for this branching model is that all development occurs off a single trunk branch, with pull requests targeting the trunk in order to merge and verify the integrity of new changes. This branching model is nearly identical to [trunk based development](https://trunkbaseddevelopment.com/), with the exception of short lived feature branches and pull requests for merging changes. Since our branching strategy is GitHub flow, the following outlines the necessary steps that should be performed for all changes:
-1. Create a new feature branch. This feature branch should be created off of the trunk branch *main*.
-2. Make all relevant changes on the feature branch, merging new changes from the trunk when appropriate.
-3. When changes to the feature branch are ready, raise a pull request to target the trunk. It is during this step that relevant CI jobs should run for formatting, unit tests, and integration tests. If applicable peer review is also performed.
-4. After the mentioned conditions in the above step are fulfilled, changes can be merged into the trunk.
+## Blue Green Deployment
+[Blue green deployment](https://www.redhat.com/en/topics/devops/what-is-blue-green-deployment) is a deployment strategy that mirrors a production environment (the *green* environment) with a staging environment (the *blue* environment). User traffic is wired on to the production environment, while the following release is tested on staging. With this release strategy, QA will happen directly in staging after development. The following is a broad outline of the steps that will be taken with our release strategy:
+1. Smoke tests should be performed in development on a feature branch, in order to verify the stability of a build.
+2. After changes are merged into the main branch, a new deployment should be made in the staging environment.
+3. From the staging environment, test cases against new features, regression against existing features, and load tests should be verified.
+4. After the changes in QA are accepted, user traffic should shift from production to staging. User traffic can shift back to the former production environment if a rollback is needed.
 
-We choose GitHub flow for this project due to the following reasons:
-- **Minimal effort for CI setup**: Since pull requests target a centralized branch in our project, GitHub Flow does not require significant effort for CI setup.
-- **Reduced risk for branch divergence**: All work happens on short-lived feature branches close to the trunk, which mitigates the chance of merge conflicts.
-- **Easy to understand**: GitHub flow is a straightforward and easy to learn branching strategy.
-- **Frequently used and well documented**: GitHub flow is a popular branching strategy, with lots of documentation for setting up a CI/CD pipeline.
+We chose the blue green deployment strategy for the following reasons:
+- **Minimal effort for environment setup**: Blue green deployments minimize the overhead from environment setup; we will only need a staging and production environment. Since our capacity estimates for this API are low, having two environments scaled for production-level traffic is not an issue.
+- **Easy to understand**: Blue green deployment strategy is a relatively easy strategy to orchestrate for deployment.
+- **Quick to implement**: Blue green deployment is not supported out of the box by K8s, but can be implemented directly. There are a lot of guides for supporting blue green deployment with plain kubectl commands.
 
