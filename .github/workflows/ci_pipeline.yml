@@ -14,4 +14,5 @@ jobs:
           cache: 'pip'
           architecture: 'x64'
           token: ${{ github.token }}
+      - run: pip install -r requirements.txt
       - run: python -m unittest discover test/
