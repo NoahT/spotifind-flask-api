@@ -14,5 +14,5 @@ jobs:
         with:
           gcloud_service_key: ${{ secrets.GKE_SA_KEY }}
           registry: gcr.io
-          project_id: ${{ GKE_PROJECT }}
+          project_id: ${{ secrets.GKE_PROJECT }}
           image_name: spotifind-app
