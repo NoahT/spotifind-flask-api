@@ -2,7 +2,7 @@ name: CD pipeline
 on:
   push:
     branches:
-      - cd-experimental
+      - main
 jobs:
   # build-and-push-to-gcr action used here https://github.com/marketplace/actions/push-to-gcr-github-action
   build-and-push-to-gcr:
