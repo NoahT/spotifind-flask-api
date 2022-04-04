@@ -1,0 +1,63 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spotifind
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spotifind-deployment
+  namespace: spotifind
+  labels:
+    app: spotifind-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: spotifind-app
+  template:
+    metadata:
+      labels:
+        app: spotifind-app
+    spec:
+      containers:
+      - name: spotifind-app
+        image: gcr.io/spotifind-api/spotifind:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: spotifind-autoscaler
+  namespace: spotifind
+  labels:
+    app: spotifind-deployment-autoscaler
+spec:
+  scaleTargetRef:
+    kind: Deployment
+    name: spotifind-deployment
+    apiVersion: apps/v1
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spotifind-service
+  namespace: spotifind
+spec:
+  selector:
+    app: spotifind-app
+  type: LoadBalancer
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 5000
