@@ -5,6 +5,6 @@ from markupsafe import escape
 
 flask_app = Flask(__name__)
 
-@flask_app.route('/', methods=['GET'])
+@flask_app.route('/index', methods=['GET'])
 def index():
-    return 'Index page!'
+    return 'Index page'
