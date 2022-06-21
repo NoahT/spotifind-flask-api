@@ -1,4 +1,4 @@
-# Business and Engineering Requirements
+# Business and Engineering Requirements (6/20/22)
 We are primarily interested in briefly documenting business and engineering requirements for this web application to constrain our problem space.
 
 ## Design Requirements
@@ -17,30 +17,88 @@ We are primarily interested in briefly documenting business and engineering requ
 ## High Level Design
 - Recommendations are made on a single song, so a bulk API is not needed.
   - Response time may vary based on the playlist size.
-- This is a first iteration of a web service that may change on a contract level, so a gateway should be used here.
-  - We might make incompatible changes later. A gateway will help us maintain a looser coupling of components if this happens.
-- We cannot rely on bandwidth as a metric for expected traffic since our service's traffic will not have ammortized behavior.
-  - Since playlist creation will cause intermittent peak loads for a single host, we should scale horizontally with a balancing strategy that favors inactive nodes.
-    - Round robin is usually fine but is not a good balancing strategy here; variable playlist size will not guarantee even distribution of traffic across nodes.
-    - We choose least connections as our balancing strategy: nodes with one or more connections is a good indicator for high load and will help us route traffic in a manner compatible with our use case.
+- A gateway is not needed here since we can enforce versioning for our API endpoints for backwards-incompatible changes.
+- We use Vertex AI for recommendations for track embeddings.
+  - Since Vertex AI offers low-latent recommendations, we will default to round robin for our load balancing strategy.
 
 ## Component Level Design
-API design currently focuses on the happy path. Non-200 status codes will be added at a later time for error handling.
-
-### Spotifind Gateway
-Our initial design for the gateway will mirror the contract we will uphold in our ReST API.
-
+### /v1/reco/{id*}
 | Resource  | Description | Type | Parameters |
 | ------------- | ------------- | ------------- | ------------- |
-| /create/song/{id}?playlistSize={size}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate | 
+| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate. Default size 10 | 
 
-### Spotifind ReST API
+#### HTTP response status codes
+| Status code | Description |
+| ------------- | ------------- |
+| 200  | When track id recommendations are returned successfully |
+| 400  | Miscellaneous client failure |
+| 404  | Client failure due to invalid track id |
+| 500  | Miscellaneous service failure |
 
-| Resource  | Description | Type | Parameters |
-| ------------- | ------------- | ------------- | ------------- |
-| /create/song/{id}?playlistSize={size}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate | 
+#### Response headers
+| Request header | Value(s) |
+| ------------- | ------------- |
+| Content-Type  | application/json |
 
-### Spotify APIs (third party)
+#### Sample requests
+**Request**
+/v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5
+
+**Response (200)**
+```
+{
+  "request": {
+    "track": {
+      "id": "62BGM9bNkNcvOh13B4wOyr"
+    },
+    "size": 5
+  },
+  "recos": [
+    {
+      "id": "2TRu7dMps7cVKOyazkj9Fb"
+    },
+    {
+      "id": "0bqrFwY1HixfnusFxhYbDl"
+    },
+    {
+      "id": "4BHSjbYylfOH5WAGusDyni"
+    },
+    {
+      "id": "3s9f1LQ6607eDj9UYCzmgk"
+    },
+    {
+      "id": "2HbKqm4o0w5wEeEFXm2sD4"
+    },
+  ]
+}
+```
+
+**Request**
+/v1/reco/invalid_id
+**Response (404)**
+```
+{
+  "error": {
+    "status": 404,
+    "message": "Invalid track id."
+  }
+}
+```
+
+**Request**
+/v1/invalid_resource
+
+**Response (404)**
+```
+{
+  "error": {
+    "status": 400,
+    "message": "Bad request."
+  }
+}
+```
+
+## Spotify APIs (third party)
 Spotify's ReST APIs are the only third party APIs being used. Their documentation is sufficient substitution for markdown:
 - [Playlist API](https://developer.spotify.com/console/post-playlists/)
 - [Tracks API](https://developer.spotify.com/console/get-several-tracks/)
