@@ -1,4 +1,3 @@
-import re
 import unittest
 import src.api.schemas.response as response
 from http import HTTPStatus
