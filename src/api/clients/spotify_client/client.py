@@ -13,8 +13,10 @@ class SpotifyClient(Client):
         self._hostname = 'https://api.spotify.com'
         self._v1_tracks_path = '/v1/tracks/'
 
-    def v1_tracks(self, id, marketplace) -> dict:
+    def v1_tracks(self, id, **kwargs) -> dict:
         endpoint = '{}{}{}'.format(self._hostname, self._v1_tracks_path, id)
+
+        marketplace = kwargs.get('marketplace')
 
         if marketplace:
             endpoint = '{}?market={}'.format(endpoint, marketplace)
