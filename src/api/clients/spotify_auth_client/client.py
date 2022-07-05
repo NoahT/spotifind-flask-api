@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from google.cloud import secretmanager
+import google_crc32c
 import os
 import requests
 import base64
@@ -58,22 +59,17 @@ class SpotifyAuthClient(Client):
         return headers
     
     def access_secret_version(self):
-        # Create the Secret Manager client.
         client = secretmanager.SecretManagerServiceClient()
+        name = client.secret_version_path(self._project_id, self._secret_id, self._secret_version_id)
 
-        # Build the resource name of the secret version.
-        name = f"projects/{self._project_id}/secrets/{self._secret_id}/versions/{self._version_id}"
+        response = client.access_secret_version(request={'name': name})
 
-        # Access the secret version.
-        response = client.access_secret_version(request={"name": name})
-
-        # Verify payload checksum.
         crc32c = google_crc32c.Checksum()
         crc32c.update(response.payload.data)
         if response.payload.data_crc32c != int(crc32c.hexdigest(), 16):
-            print("Data corruption detected.")
+            print('Data corruption detected.')
             return response
 
-        payload = response.payload.data.decode("UTF-8")
+        payload = response.payload.data.decode('UTF-8')
 
         return payload
