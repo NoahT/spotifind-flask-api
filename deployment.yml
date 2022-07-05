@@ -80,7 +80,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: /index
+      - path: /
         pathType: Prefix
         backend:
           service:

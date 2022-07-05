@@ -2,7 +2,7 @@ FROM python:3.8-slim-buster
 
 WORKDIR /app
 COPY requirements.txt requirements.txt
-COPY src/ .
+COPY src/api/ .
 
 RUN pip3 install -r requirements.txt
 
