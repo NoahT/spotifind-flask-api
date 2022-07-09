@@ -1,0 +1,92 @@
+{
+  "pipelineSpec": {
+    "components": {
+      "comp-spotifind-ann-index-deployment": {
+        "executorLabel": "exec-spotifind-ann-index-deployment",
+        "inputDefinitions": {
+          "parameters": {
+            "peering_range": {
+              "type": "STRING"
+            },
+            "project_id": {
+              "type": "STRING"
+            },
+            "region": {
+              "type": "STRING"
+            }
+          }
+        }
+      }
+    },
+    "deploymentSpec": {
+      "executors": {
+        "exec-spotifind-ann-index-deployment": {
+          "container": {
+            "command": [
+              "python3",
+              "components/pipeline_deploy.py",
+              "--peering-range",
+              "{{$.inputs.parameters['peering_range']}}",
+              "--region",
+              "{{$.inputs.parameters['region']}}",
+              "--project-id",
+              "{{$.inputs.parameters['project_id']}}"
+            ],
+            "image": "gcr.io/spotifind-api/ann_index_deployment:latest"
+          }
+        }
+      }
+    },
+    "pipelineInfo": {
+      "name": "spotifind-ann-index-pipeline"
+    },
+    "root": {
+      "dag": {
+        "tasks": {
+          "spotifind-ann-index-deployment": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-spotifind-ann-index-deployment"
+            },
+            "inputs": {
+              "parameters": {
+                "peering_range": {
+                  "componentInputParameter": "peering_range"
+                },
+                "project_id": {
+                  "componentInputParameter": "project_id"
+                },
+                "region": {
+                  "componentInputParameter": "region"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "spotifind-ann-index-deployment"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "peering_range": {
+            "type": "STRING"
+          },
+          "project_id": {
+            "type": "STRING"
+          },
+          "region": {
+            "type": "STRING"
+          }
+        }
+      }
+    },
+    "schemaVersion": "2.0.0",
+    "sdkVersion": "kfp-1.8.12"
+  },
+  "runtimeConfig": {
+    "gcsOutputDirectory": "gs://spotifind-apiaip/vertex_ai_pipeline/"
+  }
+}
