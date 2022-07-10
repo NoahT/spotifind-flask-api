@@ -39,7 +39,7 @@ class SpotifyClientTestSuite(unittest.TestCase):
 
         response = self._spotify_client.v1_tracks('id')
 
-        self.assertEquals({}, response)
+        self.assertEqual({}, response)
 
     def test_should_return_correct_authorization_header(self):
         spotify_auth_client.SpotifyAuthClient.get_bearer_token = MagicMock(return_value={
@@ -48,4 +48,4 @@ class SpotifyClientTestSuite(unittest.TestCase):
 
         bearer_token = self._spotify_client.get_bearer_token()
 
-        self.assertEquals('Bearer token', bearer_token)
+        self.assertEqual('Bearer token', bearer_token)

@@ -2,7 +2,6 @@ from unittest.mock import MagicMock, patch
 import unittest
 import requests
 import src.api.clients.spotify_auth_client.client as spotify_auth_client
-import os
 
 environment_variables = {
     'PROJECT_ID': '841506577075',
@@ -34,7 +33,7 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
     def test_should_set_correct_headers(self):
         headers = self._spotify_auth_client.get_headers('Bearer basic_auth')
 
-        self.assertEquals(headers, {
+        self.assertEqual(headers, {
             'Authorization': 'Bearer basic_auth',
             'Content-Type': 'application/x-www-form-urlencoded'
         })
@@ -42,6 +41,6 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
     def test_should_set_correct_urlencoded_form(self):
         form_urlencoded = self._spotify_auth_client.get_form_encoded()
 
-        self.assertEquals(form_urlencoded, {
+        self.assertEqual(form_urlencoded, {
             'grant_type': 'client_credentials'
         })

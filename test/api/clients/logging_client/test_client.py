@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import unittest
 import src.api.clients.logging_client.client as logging_client
 
@@ -13,8 +13,8 @@ class LoggingClientSuite(unittest.TestCase):
 
     def test_should_properly_initialize_logging_client_on_creation(self) -> None:
         project = self.client.client.project
-        self.assertEquals(project, 'spotifind-api')
+        self.assertEqual(project, 'spotifind-api')
 
     def test_should_return_logger_from_logging_client_from_given_name(self) -> None:
         logger = self.client.get_logger('name')
-        self.assertEquals(logger.name, 'name')
+        self.assertEqual(logger.name, 'name')
