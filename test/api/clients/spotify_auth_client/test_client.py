@@ -13,7 +13,8 @@ environment_variables = {
 
 class SpotifyAuthClientTestSuite(unittest.TestCase):
     @patch.dict('os.environ', environment_variables)
-    def setUp(self) -> None:
+    @patch('src.api.clients.logging_client.client.LoggingClient')
+    def setUp(self, logging_client) -> None:
         self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient()
         self._response = requests.Response()
     
