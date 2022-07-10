@@ -44,9 +44,7 @@
       "dag": {
         "tasks": {
           "spotifind-ann-index-deployment": {
-            "cachingOptions": {
-              "enableCache": true
-            },
+            "cachingOptions": {},
             "componentRef": {
               "name": "comp-spotifind-ann-index-deployment"
             },
