@@ -1,6 +1,7 @@
 import argparse
 import time
 from google.cloud import aiplatform_v1
+from ...api.clients.logging_client.client import LoggingClient
 
 parser = argparse.ArgumentParser(description='Deploy Vertex AI ANN index')
 parser.add_argument('--peering-range', type=str, help='VPC peering range for ANN index deployment')
@@ -11,6 +12,8 @@ args = parser.parse_args()
 PEERING_RANGE_NAME = args.peering_range
 REGION = args.region
 PROJECT_ID = args.project_id
+logging_client = LoggingClient()
+logger = logging_client.get_logger('ann-index-deploy')
 
 location = "projects/{}/locations/{}".format(PROJECT_ID, REGION)
 aiplatform_endpoint = "{}-aiplatform.googleapis.com".format(REGION)
@@ -50,7 +53,7 @@ def deploy_index(index, index_endpoint):
     while True:
         if deployed_index.done():
             break
-        print("Deploying index...")
+        logger.log('Deploying index...', severity='INFO')
         time.sleep(60)
     
     return deploy_index
@@ -63,4 +66,4 @@ deployed_indexes = spotifind_index.deployed_indexes
 
 if not deployed_indexes:
     deployed_index = deploy_index(spotifind_index, spotifind_index_endpoint)
-    print(deployed_index)
+    logger.log(deploy_index, severity='INFO')
