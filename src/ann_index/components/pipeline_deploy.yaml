@@ -1,0 +1,18 @@
+name: spotifind ANN index deployment
+description: Kubeflow component for ANN index service deployments
+
+inputs:
+  - { name: peering_range, description: 'VPC peering range for ANN index deployment', type: String }
+  - { name: region, description: 'Region containing ANN index endpoint deployment', type: String }
+  - { name: project_id, type: String }
+
+implementation:
+  container:
+    image: gcr.io/spotifind-api/ann_index_deployment:latest
+    command: [
+      python3,
+      components/pipeline_deploy.py,
+      --peering-range, { inputValue: peering_range },
+      --region, { inputValue: region },
+      --project-id, { inputValue: project_id }
+    ]
