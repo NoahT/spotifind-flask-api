@@ -5,6 +5,8 @@ import os
 import requests
 import base64
 
+from ..logging_client.client import LoggingClient
+
 class Client(ABC):
     @abstractmethod
     def get_bearer_token(self) -> dict:
@@ -18,6 +20,8 @@ class SpotifyAuthClient(Client):
         self._client_id = os.environ['CLIENT_ID']
         self._secret_id = os.environ['SECRET_ID']
         self._secret_version_id = os.environ['SECRET_VERSION_ID']
+        logging_client = LoggingClient()
+        self.logger = logging_client.get_logger(self.__class__.__name__)
 
     def get_bearer_token(self) -> dict:
         endpoint = '{}{}'.format(self._hostname, self._api_token_path)
@@ -67,7 +71,7 @@ class SpotifyAuthClient(Client):
         crc32c = google_crc32c.Checksum()
         crc32c.update(response.payload.data)
         if response.payload.data_crc32c != int(crc32c.hexdigest(), 16):
-            print('Data corruption detected.')
+            self.logger.log('Data corruption detected.', severity='WARNING')
             return response
 
         payload = response.payload.data.decode('UTF-8')
