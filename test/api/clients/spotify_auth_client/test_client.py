@@ -18,21 +18,24 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
         self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient()
         self._response = requests.Response()
     
-    def test_should_raise_error_for_4xx_response(self):
+    @patch('src.api.clients.logging_client.client.LoggingClient')
+    def test_should_raise_error_for_4xx_response(self, logging_client):
         self._response.status_code = 400
         requests.post = MagicMock(return_value=self._response)
         self._spotify_auth_client.get_basic_token = MagicMock(return_value='basic_token')
 
         self.assertRaises(requests.HTTPError, self._spotify_auth_client.get_bearer_token)
 
-    def test_should_raise_error_for_5xx_response(self):
+    @patch('src.api.clients.logging_client.client.LoggingClient')
+    def test_should_raise_error_for_5xx_response(self, logging_client):
         self._response.status_code = 500
         requests.post = MagicMock(return_value=self._response)
         self._spotify_auth_client.get_basic_token = MagicMock(return_value='basic_token')
         
         self.assertRaises(requests.HTTPError, self._spotify_auth_client.get_bearer_token)
 
-    def test_should_set_correct_headers(self):
+    @patch('src.api.clients.logging_client.client.LoggingClient')
+    def test_should_set_correct_headers(self, logging_client):
         headers = self._spotify_auth_client.get_headers('Bearer basic_auth')
 
         self.assertEqual(headers, {
@@ -40,7 +43,8 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
             'Content-Type': 'application/x-www-form-urlencoded'
         })
 
-    def test_should_set_correct_urlencoded_form(self):
+    @patch('src.api.clients.logging_client.client.LoggingClient')
+    def test_should_set_correct_urlencoded_form(self, logging_client):
         form_urlencoded = self._spotify_auth_client.get_form_encoded()
 
         self.assertEqual(form_urlencoded, {
