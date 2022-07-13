@@ -13,29 +13,27 @@ environment_variables = {
 
 class SpotifyAuthClientTestSuite(unittest.TestCase):
     @patch.dict('os.environ', environment_variables)
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def setUp(self, logging_client) -> None:
-        self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient()
+    def setUp(self) -> None:
+        logging_client = MagicMock()
+        logging_client.get_logger.return_value = MagicMock()
+        self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient(logging_client)
         self._response = requests.Response()
     
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_raise_error_for_4xx_response(self, logging_client):
+    def test_should_raise_error_for_4xx_response(self):
         self._response.status_code = 400
         requests.post = MagicMock(return_value=self._response)
         self._spotify_auth_client.get_basic_token = MagicMock(return_value='basic_token')
 
         self.assertRaises(requests.HTTPError, self._spotify_auth_client.get_bearer_token)
 
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_raise_error_for_5xx_response(self, logging_client):
+    def test_should_raise_error_for_5xx_response(self):
         self._response.status_code = 500
         requests.post = MagicMock(return_value=self._response)
         self._spotify_auth_client.get_basic_token = MagicMock(return_value='basic_token')
         
         self.assertRaises(requests.HTTPError, self._spotify_auth_client.get_bearer_token)
 
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_set_correct_headers(self, logging_client):
+    def test_should_set_correct_headers(self):
         headers = self._spotify_auth_client.get_headers('Bearer basic_auth')
 
         self.assertEqual(headers, {
@@ -43,8 +41,7 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
             'Content-Type': 'application/x-www-form-urlencoded'
         })
 
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_set_correct_urlencoded_form(self, logging_client):
+    def test_should_set_correct_urlencoded_form(self):
         form_urlencoded = self._spotify_auth_client.get_form_encoded()
 
         self.assertEqual(form_urlencoded, {

@@ -13,14 +13,13 @@ class Client(ABC):
         pass
 
 class SpotifyAuthClient(Client):
-    def __init__(self):
+    def __init__(self, logging_client):
         self._hostname = 'https://accounts.spotify.com'
         self._api_token_path = '/api/token'
         self._project_id = os.environ['PROJECT_ID']
         self._client_id = os.environ['CLIENT_ID']
         self._secret_id = os.environ['SECRET_ID']
         self._secret_version_id = os.environ['SECRET_VERSION_ID']
-        logging_client = LoggingClient()
         self.logger = logging_client.get_logger(self.__class__.__name__)
 
     def get_bearer_token(self) -> dict:
