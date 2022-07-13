@@ -13,7 +13,7 @@ class Client(ABC):
         pass
 
 class SpotifyAuthClient(Client):
-    def __init__(self, logging_client):
+    def __init__(self, logging_client: LoggingClient):
         self._hostname = 'https://accounts.spotify.com'
         self._api_token_path = '/api/token'
         self._project_id = os.environ['PROJECT_ID']

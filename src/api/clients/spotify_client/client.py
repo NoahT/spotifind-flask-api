@@ -9,11 +9,10 @@ class Client(ABC):
         pass
 
 class SpotifyClient(Client):
-    def __init__(self):
-        self._auth_client = SpotifyAuthClient()
+    def __init__(self, auth_client: SpotifyAuthClient, logging_client: LoggingClient):
         self._hostname = 'https://api.spotify.com'
         self._v1_tracks_path = '/v1/tracks/'
-        logging_client = LoggingClient()
+        self._auth_client = auth_client
         self.logger = logging_client.get_logger(self.__class__.__name__)
 
     def v1_tracks(self, id, **kwargs) -> dict:
