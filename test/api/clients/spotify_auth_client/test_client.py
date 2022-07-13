@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, patch
 import unittest
 import requests
 import src.api.clients.spotify_auth_client.client as spotify_auth_client
@@ -14,22 +14,22 @@ environment_variables = {
 class SpotifyAuthClientTestSuite(unittest.TestCase):
     @patch.dict('os.environ', environment_variables)
     def setUp(self) -> None:
-        logging_client = MagicMock()
-        logging_client.get_logger.return_value = MagicMock()
+        logging_client = Mock()
+        logging_client.get_logger.return_value = Mock()
         self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient(logging_client)
         self._response = requests.Response()
     
     def test_should_raise_error_for_4xx_response(self):
         self._response.status_code = 400
-        requests.post = MagicMock(return_value=self._response)
-        self._spotify_auth_client.get_basic_token = MagicMock(return_value='basic_token')
+        requests.post = Mock(return_value=self._response)
+        self._spotify_auth_client.get_basic_token = Mock(return_value='basic_token')
 
         self.assertRaises(requests.HTTPError, self._spotify_auth_client.get_bearer_token)
 
     def test_should_raise_error_for_5xx_response(self):
         self._response.status_code = 500
-        requests.post = MagicMock(return_value=self._response)
-        self._spotify_auth_client.get_basic_token = MagicMock(return_value='basic_token')
+        requests.post = Mock(return_value=self._response)
+        self._spotify_auth_client.get_basic_token = Mock(return_value='basic_token')
         
         self.assertRaises(requests.HTTPError, self._spotify_auth_client.get_bearer_token)
 

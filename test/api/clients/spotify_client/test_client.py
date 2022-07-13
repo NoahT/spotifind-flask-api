@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import Mock, MagicMock, patch
 import unittest
 import src.api.clients.spotify_client.client as spotify_client
 import src.api.clients.spotify_auth_client.client as spotify_auth_client
@@ -14,43 +14,43 @@ environment_variables = {
 
 class SpotifyClientTestSuite(unittest.TestCase):
     @patch.dict('os.environ', environment_variables)
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def setUp(self, logging_client) -> None:
-        self._spotify_client = spotify_client.SpotifyClient()
+    def setUp(self) -> None:
+        logging_client = Mock()
+        auth_client = Mock()
+        self._spotify_client = spotify_client.SpotifyClient(auth_client, logging_client)
         self._response = requests.Response()
     
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_raise_error_for_4xx_response(self, logging_client):
+    def test_should_raise_error_for_4xx_response(self):
         self._response.status_code = 400
-        requests.get = MagicMock(return_value=self._response)
-        self._spotify_client.get_bearer_token = MagicMock(return_value='Bearer token')
+        requests.get = Mock(return_value=self._response)
+        self._spotify_client.get_bearer_token = Mock(return_value='Bearer token')
 
         self.assertRaises(requests.HTTPError, self._spotify_client.v1_tracks, 'id')
 
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_raise_error_for_5xx_response(self, logging_client):
+    def test_should_raise_error_for_5xx_response(self):
         self._response.status_code = 500
-        requests.get = MagicMock(return_value=self._response)
-        self._spotify_client.get_bearer_token = MagicMock(return_value='Bearer token')
+        requests.get = Mock(return_value=self._response)
+        self._spotify_client.get_bearer_token = Mock(return_value='Bearer token')
 
         self.assertRaises(requests.HTTPError, self._spotify_client.v1_tracks, 'id')
 
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_return_json_for_2xx_response(self, logging_client):
+    def test_should_return_json_for_2xx_response(self):
         self._response.status_code = 200
-        requests.get = MagicMock(return_value=self._response)
-        requests.Response.json = MagicMock(return_value={})
-        self._spotify_client.get_bearer_token = MagicMock(return_value='Bearer token')
+        requests.get = Mock(return_value=self._response)
+        requests.Response.json = Mock(return_value={})
+        self._spotify_client.get_bearer_token = Mock(return_value='Bearer token')
 
         response = self._spotify_client.v1_tracks('id')
 
         self.assertEqual({}, response)
 
-    @patch('src.api.clients.logging_client.client.LoggingClient')
-    def test_should_return_correct_authorization_header(self, logging_client):
-        spotify_auth_client.SpotifyAuthClient.get_bearer_token = MagicMock(return_value={
+    def test_should_return_correct_authorization_header(self):
+        auth_client = Mock()
+        auth_client.get_bearer_token.return_value = {
             'access_token': 'token'
-        })
+        }
+        logging_client = Mock()
+        self._spotify_client = spotify_client.SpotifyClient(auth_client, logging_client)
 
         bearer_token = self._spotify_client.get_bearer_token()
 
