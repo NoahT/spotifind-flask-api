@@ -42,3 +42,5 @@ steps:
 images:
 - gcr.io/${PROJECT_ID}/spotifind
 - gcr.io/${PROJECT_ID}/spotifind-integration-test
+options:
+  logging: CLOUD_LOGGING_ONLY
