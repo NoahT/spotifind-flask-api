@@ -12,7 +12,7 @@ steps:
 # Build the container image for integration tests
 - id: 'Build Docker image for spotifind API integration tests'
   name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--network=cloudbuild', '-t', 'gcr.io/${PROJECT_ID}/spotifind-integration-test', '-f', './test/integration_tests/Dockerfile', '.']
+  args: ['build', '--no-cache', '--network=cloudbuild', '-t', 'gcr.io/${PROJECT_ID}/spotifind-integration-test', '-f', './test/integration_tests/Dockerfile', '.']
 # Push the container image for integration tests to Container Registry
 - id: 'Push Docker image for spotifind API integration tests to Google Container Registry'
   name: 'gcr.io/cloud-builders/docker'
