@@ -15,4 +15,4 @@ jobs:
           architecture: 'x64'
           token: ${{ github.token }}
       - run: pip install -r requirements.txt
-      - run: python -m unittest discover test/
+      - run: python -m unittest discover test/unit_tests/
