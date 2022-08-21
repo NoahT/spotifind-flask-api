@@ -35,9 +35,9 @@ def get_ann_index():
 
 def deploy_index(index, index_endpoint):
     deployed_index = aiplatform_v1.DeployedIndex({
-        "id": "{}-deployed".format(index.display_name),
+        "id": "{}_deployed".format(index.display_name),
         "index": index.name,
-        "display_name": "{}-deployed".format(index.display_name),
+        "display_name": "{}_deployed".format(index.display_name),
         "reserved_ip_ranges": [
             PEERING_RANGE_NAME
         ]
