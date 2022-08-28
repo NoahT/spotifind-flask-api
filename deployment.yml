@@ -38,6 +38,8 @@ spec:
           value: "spotify-rest-api-secret"
         - name: SECRET_VERSION_ID
           value: "latest"
+        - name: ENVIRONMENT
+          value: "staging"
 ---
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
