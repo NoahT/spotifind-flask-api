@@ -33,7 +33,7 @@ class MockMatchServiceClient(Client):
         return neighbor
 
 class MatchServiceClient(Client):
-    def __init__(self, location, index_endpoint_service_client=aiplatform_v1.IndexEndpointServiceClient(client_options=dict(api_endpoint=aiplatform_endpoint))) -> None:
+    def __init__(self, location='us-west1', index_endpoint_service_client=aiplatform_v1.IndexEndpointServiceClient(client_options=dict(api_endpoint=aiplatform_endpoint))) -> None:
         self.location=location
         self.index_endpoint_service_client = index_endpoint_service_client
         self.get_service_metadata()
