@@ -1,5 +1,8 @@
 from flask import Blueprint, request, jsonify
 from flasgger import swag_from
+from ..config.config_facade import ConfigFacade
+from ..clients.matching_engine_client.client_aggregator import ClientAggregator
+from ..clients.matching_engine_client.client import MockMatchServiceClient, MatchServiceClient
 
 reco = Blueprint('reco', __name__)
 
@@ -109,6 +112,15 @@ reco = Blueprint('reco', __name__)
     }
 })
 def id(id):
+    config_facade = ConfigFacade()
+    print('Environment: {}'.format(config_facade.get_environment()))
+    print('Match service enabled: {}'.format(config_facade.is_match_service_enabled()))
+    
+    client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
+    client = client_aggregator.get_client()
+    match = client.get_match(match_request={})
+    print(match.__str__())
+
     return jsonify({
         "request": {
             "track": {
