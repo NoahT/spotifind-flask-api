@@ -16,3 +16,6 @@ jobs:
           token: ${{ github.token }}
       - run: pip install -r requirements.txt
       - run: python -m unittest discover test/unit_tests/
+        # Could not find any documentation on mocking google cloud client libraries for unit tests. We mock credentials as an alternative.
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: test/unit_tests/mock_secret.json
