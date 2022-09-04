@@ -1,3 +1,4 @@
 {
-    "TEST": "development"
+    "ENVIRONMENT": "development",
+    "MATCH_SERVICE_ENABLED": false
 }

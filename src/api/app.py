@@ -20,7 +20,7 @@ load_config(flask_app, config_env)
 
 swagger = Swagger(flask_app)
 
-print('Value of TEST in config: {}'.format(flask_app.config['TEST']))
+print('Current environment: {}'.format(flask_app.config['ENVIRONMENT']))
 
 v1.register_blueprint(reco, url_prefix='/reco')
 flask_app.register_blueprint(v1, url_prefix='/v1')
