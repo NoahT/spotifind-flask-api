@@ -29,7 +29,7 @@ class V1RecoAdapter(RecoAdapter):
             
             audio_features = self.spotify_client.v1_audio_features(id=id)
             track_embedding = self.get_embedding(audio_features=audio_features)
-            recos = self.match_service_client.get_match(match_request=track_embedding)
+            recos = self.match_service_client.get_match(match_request={'query': track_embedding})
             recos_dict = MessageToDict(recos, including_default_value_fields=True, preserving_proto_field_name=False)
             recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_dict=recos_dict, id=id, size=size)
         except HTTPError as http_error:
