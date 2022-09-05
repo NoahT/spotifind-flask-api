@@ -3,6 +3,11 @@ from flasgger import swag_from
 from ..config.config_facade import ConfigFacade
 from ..clients.matching_engine_client.client_aggregator import ClientAggregator
 from ..clients.matching_engine_client.client import MockMatchServiceClient, MatchServiceClient
+from ..clients.spotify_client.client import SpotifyClient
+from ..clients.spotify_auth_client.client import SpotifyAuthClient
+from ..clients.logging_client.client import LoggingClient
+from ..schemas.response import ResponseBuilderFactory
+from ..util.reco_adapter import V1RecoAdapter
 
 reco = Blueprint('reco', __name__)
 
@@ -114,35 +119,16 @@ reco = Blueprint('reco', __name__)
 def id(id):
     config_facade = ConfigFacade()
     print('Environment: {}'.format(config_facade.get_environment()))
-    print('Match service enabled: {}'.format(config_facade.is_match_service_enabled()))
+    print('Is match service enabled: {}'.format(config_facade.is_match_service_enabled()))
     
+    logging_client = LoggingClient()
+    spotify_auth_client = SpotifyAuthClient(logging_client=logging_client)
+    spotify_client = SpotifyClient(auth_client=spotify_auth_client, logging_client=logging_client)
     client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
-    client = client_aggregator.get_client()
-    match = client.get_match(match_request={})
-    print(match.__str__())
+    response_builder_factory = ResponseBuilderFactory()
+    reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
+    size = request.args.get(key='size', type=int) or 5
+    response = reco_adapter.get_recos(id=id, size=size)
+    print(response.__str__())
 
-    return jsonify({
-        "request": {
-            "track": {
-                "id": id
-            },
-            "size": request.args.get(key='size', type=int) or 5
-        },
-        "recos": [
-            {
-                "id": "2TRu7dMps7cVKOyazkj9Fb"
-            },
-            {
-                "id": "0bqrFwY1HixfnusFxhYbDl"
-            },
-            {
-                "id": "4BHSjbYylfOH5WAGusDyni"
-            },
-            {
-                "id": "3s9f1LQ6607eDj9UYCzmgk"
-            },
-            {
-                "id": "2HbKqm4o0w5wEeEFXm2sD4"
-            },
-        ]
-    })
+    return jsonify(response)
