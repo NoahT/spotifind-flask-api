@@ -34,10 +34,25 @@ class OkResponseBuilder(ResponseBuilder):
         self._response_code = HTTPStatus.OK.value
     
     def build_response(self, recos_dict: dict, id: str, size: int) -> dict:
-        return {} # TODO
+        print(recos_dict.__str__())
+        response = {
+            'request': {
+                'track': {
+                    'id': id
+                },
+                'size': size
+            }
+        }
+        recos = []
+        for reco in recos_dict['neighbor']:
+            recos.append({ 'id': reco['id'] })
+        
+        response['recos'] = recos
+
+        return response
 
 class ResponseBuilderFactory():
-    def __init__(self, bad_request_builder, not_found_builder, ok_builder) -> None:
+    def __init__(self, bad_request_builder=BadRequestResponseBuilder(), not_found_builder=NotFoundResponseBuilder(), ok_builder=OkResponseBuilder()) -> None:
         self._bad_request_builder = bad_request_builder
         self._not_found_builder = not_found_builder
         self._ok_builder = ok_builder

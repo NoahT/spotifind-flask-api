@@ -51,10 +51,44 @@ class ResponseBuilderTestSuite(unittest.TestCase):
         self.assertEqual(not_found_response, response_404)
     
     def test_should_properly_build_200_response(self):
-        ok_response = response.OkResponseBuilder().build_response(recos_dict={}, id='123', size=5)
-        response_200 = {} # TODO
+        recos_dict = {
+            "neighbor": [
+                {
+                    "id": "7C48cUjCGx14K5b41e9vTD",
+                    "distance": 1.0
+                },
+                {
+                    "id": "3x7gMvCsL1SS6THGwB55Pm",
+                    "distance": 2.0
+                },
+                {
+                    "id": "7sLQGgXFs4LaGAaDErPwOl",
+                    "distance": 5.0
+                }
+            ]
+        }
+        expected_response = {
+            "recos": [
+                {
+                    "id": "7C48cUjCGx14K5b41e9vTD"
+                },
+                {
+                    "id": "3x7gMvCsL1SS6THGwB55Pm"
+                },
+                {
+                    "id": "7sLQGgXFs4LaGAaDErPwOl"
+                }
+            ],
+            "request": {
+                "size": 5,
+                "track": {
+                    "id": "123"
+                }
+            }
+        }
+        ok_response = response.OkResponseBuilder().build_response(recos_dict=recos_dict, id='123', size=5)
 
-        self.assertEqual(ok_response, response_200)
+        self.assertEqual(expected_response, ok_response)
 
         
 
