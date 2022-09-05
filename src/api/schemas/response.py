@@ -3,24 +3,15 @@ from http import HTTPStatus
 from abc import ABC
 
 class ResponseBuilder(ABC):
-    def set_spotify_tracks_response(self, spotify_tracks_response) -> None:
-        self._spotify_tracks_response = spotify_tracks_response
-
-    def set_vertex_ann_response(self, vertex_ann_response) -> None:
-        self._vertex_ann_response = vertex_ann_response
-    
-    def set_request(self, request) -> None:
-        self._request = request
-
     @abstractmethod
-    def build_response(self) -> dict:
+    def build_response(self, recos_dict: dict, id: str, size: int) -> dict:
         pass
 
 class BadRequestResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.BAD_REQUEST.value
 
-    def build_response(self) -> dict:
+    def build_response(self, recos_dict: dict, id: str, size: int) -> dict:
         response = {
             "message": "Bad request.",
             "status": self._response_code
@@ -31,9 +22,9 @@ class NotFoundResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.NOT_FOUND.value
     
-    def build_response(self) -> dict:
+    def build_response(self, recos_dict: dict, id: str, size: int) -> dict:
         response = {
-            "message": "Invalid track id.",
+            "message": "Invalid track id: {}".format(id),
             "status": self._response_code
         }
         return response
@@ -42,11 +33,26 @@ class OkResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.OK.value
     
-    def build_response(self) -> dict:
-        return {} # TODO
+    def build_response(self, recos_dict: dict, id: str, size: int) -> dict:
+        print(recos_dict.__str__())
+        response = {
+            'request': {
+                'track': {
+                    'id': id
+                },
+                'size': size
+            }
+        }
+        recos = []
+        for reco in recos_dict['neighbor']:
+            recos.append({ 'id': reco['id'] })
+        
+        response['recos'] = recos
+
+        return response
 
 class ResponseBuilderFactory():
-    def __init__(self, bad_request_builder, not_found_builder, ok_builder) -> None:
+    def __init__(self, bad_request_builder=BadRequestResponseBuilder(), not_found_builder=NotFoundResponseBuilder(), ok_builder=OkResponseBuilder()) -> None:
         self._bad_request_builder = bad_request_builder
         self._not_found_builder = not_found_builder
         self._ok_builder = ok_builder

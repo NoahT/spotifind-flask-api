@@ -5,16 +5,16 @@ from . import match_service_pb2
 from . import match_service_pb2_grpc
 
 REGION = "us-west1"
-location = "projects/841506577075/locations/{}".format(REGION)
+default_location = "projects/841506577075/locations/{}".format(REGION)
 aiplatform_endpoint = "{}-aiplatform.googleapis.com".format(REGION)
 
 class Client(ABC):
     @abstractmethod
-    def get_match(self, match_request: dict) -> dict:
+    def get_match(self, match_request: dict) -> match_service_pb2.MatchResponse:
         pass
 
 class MockMatchServiceClient(Client):
-    def get_match(self, match_request: dict) -> dict:
+    def get_match(self, match_request: dict) -> match_service_pb2.MatchResponse:
         response = match_service_pb2.MatchResponse()
         
         neighbor1 = self.get_neighbor('7C48cUjCGx14K5b41e9vTD', 1)
@@ -33,12 +33,12 @@ class MockMatchServiceClient(Client):
         return neighbor
 
 class MatchServiceClient(Client):
-    def __init__(self, location='us-west1', index_endpoint_service_client=aiplatform_v1.IndexEndpointServiceClient(client_options=dict(api_endpoint=aiplatform_endpoint))) -> None:
+    def __init__(self, location=default_location, index_endpoint_service_client=aiplatform_v1.IndexEndpointServiceClient(client_options=dict(api_endpoint=aiplatform_endpoint))) -> None:
         self.location=location
         self.index_endpoint_service_client = index_endpoint_service_client
         self.get_service_metadata()
     
-    def get_match(self, match_request: dict) -> dict:
+    def get_match(self, match_request: dict) -> match_service_pb2.MatchResponse:
         request = match_service_pb2.MatchRequest()
         request.deployed_index_id = self.DEPLOYED_INDEX_ID
         
@@ -48,9 +48,6 @@ class MatchServiceClient(Client):
         
         for val in query:
             request.float_val.append(val)
-        request.float_val.append(0)
-        request.float_val.append(1)
-        request.float_val.append(2)
         
         response = self.stub.Match(request)
         
