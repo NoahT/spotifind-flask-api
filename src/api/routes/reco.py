@@ -1,4 +1,5 @@
-from flask import Blueprint, request, jsonify
+from http import HTTPStatus
+from flask import Blueprint, request
 from flasgger import swag_from
 from ..config.config_facade import ConfigFacade
 from ..clients.matching_engine_client.client_aggregator import ClientAggregator
@@ -117,18 +118,26 @@ reco = Blueprint('reco', __name__)
     }
 })
 def id(id):
-    config_facade = ConfigFacade()
-    print('Environment: {}'.format(config_facade.get_environment()))
-    print('Is match service enabled: {}'.format(config_facade.is_match_service_enabled()))
-    
-    logging_client = LoggingClient()
-    spotify_auth_client = SpotifyAuthClient(logging_client=logging_client)
-    spotify_client = SpotifyClient(auth_client=spotify_auth_client, logging_client=logging_client)
-    client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
+    response = None
+
     response_builder_factory = ResponseBuilderFactory()
-    reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
-    size = request.args.get(key='size') or str(5)
-    response = reco_adapter.get_recos(id=id, size=size)
-    print(response.__str__())
+    try:
+        config_facade = ConfigFacade()
+        print('Environment: {}'.format(config_facade.get_environment()))
+        print('Is match service enabled: {}'.format(config_facade.is_match_service_enabled()))
+
+        logging_client = LoggingClient()
+        spotify_auth_client = SpotifyAuthClient(logging_client=logging_client)
+        spotify_client = SpotifyClient(auth_client=spotify_auth_client, logging_client=logging_client)
+        client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
+        reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
+        
+        size = request.args.get(key='size') or str(5)
+        
+        response = reco_adapter.get_recos(id=id, size=size)
+    except Exception as exception:
+        response = response_builder_factory.get_builder(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(recos_response=None, id=id, size=size)
+    finally:
+        print(response.__str__())
 
     return response.response, response.response_code
