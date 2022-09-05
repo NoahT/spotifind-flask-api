@@ -31,9 +31,9 @@ class ResponseFactoryTestSuite(unittest.TestCase):
     def test_should_raise_error_when_unsupported_status_used(self):
         self.assertRaises(ValueError, self._response_builder_factory.get_builder, HTTPStatus.BAD_GATEWAY.value)
 
-class ResponseBuilder4xxTestSuite(unittest.TestCase):
+class ResponseBuilderTestSuite(unittest.TestCase):
     def test_should_properly_build_400_response(self):
-        bad_request_response = response.BadRequestResponseBuilder().build_response()
+        bad_request_response = response.BadRequestResponseBuilder().build_response(recos_dict={}, id='123', size=5)
         response_400 = {
             "message": "Bad request.",
             "status": 400
@@ -42,16 +42,16 @@ class ResponseBuilder4xxTestSuite(unittest.TestCase):
         self.assertEqual(bad_request_response, response_400)
     
     def test_should_properly_build_404_response(self):
-        not_found_response = response.NotFoundResponseBuilder().build_response()
+        not_found_response = response.NotFoundResponseBuilder().build_response(recos_dict={}, id='123', size=5)
         response_404 = {
-            "message": "Invalid track id.",
+            "message": "Invalid track id: 123",
             "status": 404
         }
 
         self.assertEqual(not_found_response, response_404)
     
     def test_should_properly_build_200_response(self):
-        ok_response = response.OkResponseBuilder().build_response()
+        ok_response = response.OkResponseBuilder().build_response(recos_dict={}, id='123', size=5)
         response_200 = {} # TODO
 
         self.assertEqual(ok_response, response_200)
