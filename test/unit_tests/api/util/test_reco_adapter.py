@@ -60,7 +60,7 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
         }
         self.reco_adapter.match_service_client.get_match.return_value = MatchResponse()
 
-        response = self.reco_adapter.get_recos(id='id', size=5)
+        response = self.reco_adapter.get_recos(id='id', size='5')
 
         self.assertEqual(200, response['status'])
 
@@ -69,17 +69,17 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
             raise HTTPError(None, HTTPStatus.NOT_FOUND.value, 'Track not found', None, None)
         self.reco_adapter.spotify_client.v1_audio_features.side_effect = side_effect
 
-        response = self.reco_adapter.get_recos(id='id', size=5)
+        response = self.reco_adapter.get_recos(id='id', size='5')
 
         self.assertEqual(404, response['status'])
 
     def test_should_return_400_response_on_invalid_reco_size_value(self) -> None:
-        response = self.reco_adapter.get_recos(id='id', size=0)
+        response = self.reco_adapter.get_recos(id='id', size='0')
         
         self.assertEqual(400, response['status'])
     
     def test_should_return_400_response_on_invalid_reco_size_type(self) -> None:
-        response = self.reco_adapter.get_recos(id='id', size=1.1)
+        response = self.reco_adapter.get_recos(id='id', size='1.1')
         
         self.assertEqual(400, response['status'])
 

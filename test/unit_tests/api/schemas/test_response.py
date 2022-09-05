@@ -33,22 +33,24 @@ class ResponseFactoryTestSuite(unittest.TestCase):
 
 class ResponseBuilderTestSuite(unittest.TestCase):
     def test_should_properly_build_400_response(self):
-        bad_request_response = response.BadRequestResponseBuilder().build_response(recos_dict={}, id='123', size=5)
+        bad_request_response = response.BadRequestResponseBuilder().build_response(recos_response={}, id='123', size=5)
         response_400 = {
             "message": "Bad request.",
             "status": 400
         }
 
-        self.assertEqual(bad_request_response, response_400)
+        self.assertEqual(response_400, bad_request_response.response)
+        self.assertEqual(400, bad_request_response.response_code)
     
     def test_should_properly_build_404_response(self):
-        not_found_response = response.NotFoundResponseBuilder().build_response(recos_dict={}, id='123', size=5)
+        not_found_response = response.NotFoundResponseBuilder().build_response(recos_response={}, id='123', size=5)
         response_404 = {
             "message": "Invalid track id: 123",
             "status": 404
         }
 
-        self.assertEqual(not_found_response, response_404)
+        self.assertEqual(response_404, not_found_response.response)
+        self.assertEqual(404, not_found_response.response_code)
     
     def test_should_properly_build_200_response(self):
         recos_dict = {
@@ -86,9 +88,10 @@ class ResponseBuilderTestSuite(unittest.TestCase):
                 }
             }
         }
-        ok_response = response.OkResponseBuilder().build_response(recos_dict=recos_dict, id='123', size=5)
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos_dict, id='123', size=5)
 
-        self.assertEqual(expected_response, ok_response)
+        self.assertEqual(expected_response, ok_response.response)
+        self.assertEqual(200, ok_response.response_code)
 
         
 

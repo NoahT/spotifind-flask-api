@@ -127,8 +127,8 @@ def id(id):
     client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
     response_builder_factory = ResponseBuilderFactory()
     reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
-    size = request.args.get(key='size', type=int) or 5
+    size = request.args.get(key='size') or str(5)
     response = reco_adapter.get_recos(id=id, size=size)
     print(response.__str__())
 
-    return jsonify(response)
+    return response.response, response.response_code
