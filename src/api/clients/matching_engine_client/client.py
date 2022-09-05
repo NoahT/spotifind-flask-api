@@ -48,6 +48,8 @@ class MatchServiceClient(Client):
         
         for val in query:
             request.float_val.append(val)
+        num_recos = match_request['num_recos']
+        request.num_neighbors = num_recos
         
         response = self.stub.Match(request)
         

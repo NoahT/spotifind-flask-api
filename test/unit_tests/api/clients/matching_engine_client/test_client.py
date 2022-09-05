@@ -41,8 +41,8 @@ class MatchServiceClientTestSuite(unittest.TestCase):
         self.assertRaises(KeyError, self.match_service_client.get_match, {})
 
     def test_should_raise_error_on_empty_query_for_match_service(self) -> None:
-        self.assertRaises(ValueError, self.match_service_client.get_match, {'query': []})
+        self.assertRaises(ValueError, self.match_service_client.get_match, {'query': [], 'num_recos': 5})
 
     def test_should_return_response_on_happy_path_for_match_service(self) -> None:
-        response = self.match_service_client.get_match(match_request={'query': [1, 2, 3]})
+        response = self.match_service_client.get_match(match_request={'query': [1, 2, 3], 'num_recos': 5})
         self.assertIsNotNone(response)
