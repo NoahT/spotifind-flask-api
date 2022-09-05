@@ -18,8 +18,8 @@ class BadRequestResponseBuilder(ResponseBuilder):
 
     def build_response(self, recos_response: dict, id: str, size: int) -> Response:
         response = {
-            "message": "Bad request.",
-            "status": self._response_code
+            'message': 'Bad request.',
+            'status': self._response_code
         }
         return Response(response=response, response_code=self._response_code)
 
@@ -29,8 +29,19 @@ class NotFoundResponseBuilder(ResponseBuilder):
     
     def build_response(self, recos_response: dict, id: str, size: int) -> Response:
         response = {
-            "message": "Invalid track id: {}".format(id),
-            "status": self._response_code
+            'message': 'Invalid track id: {}'.format(id),
+            'status': self._response_code
+        }
+        return Response(response=response, response_code=self._response_code)
+
+class InternalServerErrorResponseBuilder(ResponseBuilder):
+    def __init__(self) -> None:
+        self._response_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+    
+    def build_response(self, recos_response: dict, id: str, size: int) -> Response:
+        response = {
+            'message': 'An unexpected error occurred. Please contact a contributor for assistance.',
+            'status': self._response_code
         }
         return Response(response=response, response_code=self._response_code)
 
@@ -57,9 +68,10 @@ class OkResponseBuilder(ResponseBuilder):
         return Response(response=response, response_code=self._response_code)
 
 class ResponseBuilderFactory():
-    def __init__(self, bad_request_builder=BadRequestResponseBuilder(), not_found_builder=NotFoundResponseBuilder(), ok_builder=OkResponseBuilder()) -> None:
+    def __init__(self, bad_request_builder=BadRequestResponseBuilder(), not_found_builder=NotFoundResponseBuilder(), internal_server_error_builder=InternalServerErrorResponseBuilder(), ok_builder=OkResponseBuilder()) -> None:
         self._bad_request_builder = bad_request_builder
         self._not_found_builder = not_found_builder
+        self._internal_server_error_builder = internal_server_error_builder
         self._ok_builder = ok_builder
     
     def get_builder(self, status_code) -> ResponseBuilder:
@@ -68,6 +80,8 @@ class ResponseBuilderFactory():
             builder = self._bad_request_builder
         elif status_code == HTTPStatus.NOT_FOUND.value:
             builder = self._not_found_builder
+        elif status_code == HTTPStatus.INTERNAL_SERVER_ERROR.value:
+            builder = self._internal_server_error_builder
         elif status_code == HTTPStatus.OK.value:
             builder = self._ok_builder
         else:

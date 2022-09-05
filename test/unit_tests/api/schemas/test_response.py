@@ -6,10 +6,12 @@ class ResponseFactoryTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         self._bad_request_response_builder = response.BadRequestResponseBuilder()
         self._not_found_response_builder = response.NotFoundResponseBuilder()
+        self._internal_server_error_builder = response.InternalServerErrorResponseBuilder()
         self._ok_response_builder = response.OkResponseBuilder()
         self._response_builder_factory = response.ResponseBuilderFactory(
             self._bad_request_response_builder,
             self._not_found_response_builder,
+            self._internal_server_error_builder,
             self._ok_response_builder
         )
     
@@ -22,6 +24,11 @@ class ResponseFactoryTestSuite(unittest.TestCase):
         response_builder = self._response_builder_factory.get_builder(HTTPStatus.NOT_FOUND.value)
 
         self.assertIs(response_builder, self._not_found_response_builder)
+    
+    def test_should_return_not_found_response_builder_on_500(self):
+        response_builder = self._response_builder_factory.get_builder(HTTPStatus.INTERNAL_SERVER_ERROR.value)
+
+        self.assertIs(response_builder, self._internal_server_error_builder)
     
     def test_should_return_ok_response_builder_on_200(self):
         response_builder = self._response_builder_factory.get_builder(HTTPStatus.OK.value)
@@ -51,6 +58,16 @@ class ResponseBuilderTestSuite(unittest.TestCase):
 
         self.assertEqual(response_404, not_found_response.response)
         self.assertEqual(404, not_found_response.response_code)
+    
+    def test_should_properly_build_500_response(self):
+        internal_server_error_response = response.InternalServerErrorResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        response_500 = {
+            'message': 'An unexpected error occurred. Please contact a contributor for assistance.',
+            'status': 500
+        }
+
+        self.assertEqual(response_500, internal_server_error_response.response)
+        self.assertEqual(500, internal_server_error_response.response_code)
     
     def test_should_properly_build_200_response(self):
         recos_dict = {
