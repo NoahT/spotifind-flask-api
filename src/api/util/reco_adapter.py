@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from http import HTTPStatus
 from urllib.error import HTTPError
+from requests import HTTPError as ClientHTTPError
 from ..clients.spotify_client.client import Client as SpotifyClient
 from ..clients.logging_client.client import Client as LoggingClient
 from ..clients.matching_engine_client.client_aggregator import ClientAggregator
@@ -36,8 +37,11 @@ class V1RecoAdapter(RecoAdapter):
             recos_dict = MessageToDict(recos, including_default_value_fields=True, preserving_proto_field_name=False)
             recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_response=recos_dict, id=id, size=size)
         except HTTPError as http_error:
-            print(http_error.msg)
+            print(http_error.__str__())
             recos_response = self.response_builder_factory.get_builder(status_code=http_error.code).build_response(recos_response=recos_dict, id=id, size=size)
+        except ClientHTTPError as client_http_error:
+            print(client_http_error.__str__())
+            recos_response = self.response_builder_factory.get_builder(status_code=client_http_error.response.status_code).build_response(recos_response=recos_dict, id=id, size=size)
         
         return recos_response
     

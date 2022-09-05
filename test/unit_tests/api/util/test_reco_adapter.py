@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from urllib.error import HTTPError
+from requests import HTTPError as ClientHTTPError, Response
 from unittest.mock import patch, Mock
 from src.api.util.reco_adapter import V1RecoAdapter
 from src.api.schemas.response import BadRequestResponseBuilder, NotFoundResponseBuilder, OkResponseBuilder
@@ -64,14 +64,16 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
 
         self.assertEqual(200, response['status'])
 
-    def test_should_return_404_response_on_invalid_track_id(self) -> None:
+    def test_should_return_400_response_on_invalid_track_id(self) -> None:
         def side_effect(id):
-            raise HTTPError(None, HTTPStatus.NOT_FOUND.value, 'Track not found', None, None)
+            response = Mock(Response)
+            response.status_code = 400
+            raise ClientHTTPError(response=response)
         self.reco_adapter.spotify_client.v1_audio_features.side_effect = side_effect
 
         response = self.reco_adapter.get_recos(id='id', size='5')
 
-        self.assertEqual(404, response['status'])
+        self.assertEqual(400, response['status'])
 
     def test_should_return_400_response_on_invalid_reco_size_value(self) -> None:
         response = self.reco_adapter.get_recos(id='id', size='0')
