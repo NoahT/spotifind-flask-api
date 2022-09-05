@@ -11,7 +11,7 @@ class ConfigFacadeTestSuite(unittest.TestCase):
             self.config_facade = ConfigFacade()
 
     def test_should_return_environment_when_in_config(self) -> None:
-        self.assertEquals('development', self.config_facade.get_environment())
+        self.assertEqual('development', self.config_facade.get_environment())
 
     def test_should_return_if_match_service_client_enabled(self) -> None:
         self.assertTrue(self.config_facade.is_match_service_enabled())

@@ -30,9 +30,8 @@ class ClientAggregatorTestSuite(unittest.TestCase):
     @patch('src.api.clients.matching_engine_client.client.MockMatchServiceClient')
     def test_should_not_reinstantiate_client_when_created(self, mock_match_service_client, match_service_client, config_facade) -> None:
         config_facade.is_match_service_enabled.return_value = False
-        mock_match_service_client_instance = mock_match_service_client.return_value
         client_aggregator = ClientAggregator(config_facade, mock_match_service_client, match_service_client)
         client_aggregator.get_client()
         client_aggregator.get_client()
 
-        self.assertEquals(1, mock_match_service_client.call_count)
+        self.assertEqual(1, mock_match_service_client.call_count)
