@@ -40,9 +40,10 @@ class SpotifyClient(Client):
         }
 
         response = requests.get(endpoint, headers=headers)
-        batch.commit()
         response.raise_for_status()
         response_json = response.json()
+        batch.log('response={}'.format(response_json), severity='INFO')
+        batch.commit()
 
         return response_json
     
@@ -60,9 +61,10 @@ class SpotifyClient(Client):
         }
 
         response = requests.get(endpoint, headers=headers)
-        batch.commit()
         response.raise_for_status()
         response_json = response.json()
+        batch.log('response={}'.format(response_json), severity='INFO')
+        batch.commit()
 
         return response_json
     
