@@ -32,6 +32,8 @@ class SpotifyClient(Client):
         if marketplace:
             batch.log('marketplace={}'.format(marketplace), severity='INFO')
             endpoint = '{}?market={}'.format(endpoint, marketplace)
+        else:
+            batch.log('marketplace query param omitted.', severity='INFO')
 
         bearer_token = self.get_bearer_token()
 
@@ -40,6 +42,7 @@ class SpotifyClient(Client):
         }
 
         response = requests.get(endpoint, headers=headers)
+        batch.log('status={}'.format(response.status_code), severity='NOTICE')
         response.raise_for_status()
         response_json = response.json()
         batch.log('response={}'.format(response_json), severity='INFO')
@@ -61,6 +64,7 @@ class SpotifyClient(Client):
         }
 
         response = requests.get(endpoint, headers=headers)
+        batch.log('status={}'.format(response.status_code), severity='NOTICE')
         response.raise_for_status()
         response_json = response.json()
         batch.log('response={}'.format(response_json), severity='INFO')
