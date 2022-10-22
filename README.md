@@ -5,7 +5,6 @@ REST API for recommending tracks and creating playlists on Spotify.
 Spotifind is a REST web service that provides the ability to provide any number of Spotify track recommendations based on any available input track.
 
 ### How the recommendations work
-
 (This is not needed to interface with the API, but it's an interesting read if you like machine learning, linear algebra, or distributed systems)
 
 We motivate understanding by the following constraints imposed on our API:
@@ -81,13 +80,29 @@ Response:
 ```
 
 ## Contributions
+Outside contributions are currently only allowed on an invite-only basis. The following guide is put together to help with onboarding.
 
-### Getting started
+### Installation
+Spotifind API makes use of the following stack. Feel free to install these with a package manager like [Homebrew](https://brew.sh/).
+1. [Python 3.8.x](https://www.python.org/downloads/release/python-380/)
+   - [Documentation](https://docs.python.org/3.8/)
+2. [Flask 2.1.x](https://flask.palletsprojects.com/en/2.1.x/installation/), our web service framework of choice
+   - [Documentation](https://flask.palletsprojects.com/en/2.1.x/#api-reference)
+3. Any HTTP service client
+   - This project uses [Postman API client](https://www.postman.com/) by default, but [Insomnia](https://insomnia.rest/) is also a good choice that is [directly compatible](https://docs.insomnia.rest/insomnia/import-export-data) with Postman collections.
+      - [Postman documentation](https://learning.postman.com/docs/getting-started/introduction/)
+4. [Docker](https://docs.docker.com/get-docker/), our container runtime
+   - [Quickstart](https://docs.docker.com/get-started/)
+   - [Documentation](https://docs.docker.com/reference/)
+5. [Kubernetes](https://kubernetes.io/releases/download/), which we use to orchestrate our containerized application
+   - [Beginner's guide](https://kubernetes.io/docs/tutorials/kubernetes-basics/)
+   - [Documentation](https://kubernetes.io/docs/home/)
+6. [Minikube](https://minikube.sigs.k8s.io/docs/start/), which we use for local Kubernetes development
+7. [gcloud CLI](https://cloud.google.com/sdk/gcloud), which we use to interface with most resources on [Google Cloud Platform](https://cloud.google.com/) (GCP)
+   - Beyond installing the CLI, please email me directly at [noah.teshima@gmail.com](mailto:noah.teshima@gmail.com?subject=GCP%20spotifind%20API%20access) in order to request onboarding to our project on GCP.
 
-#### Installation
+### Development
 
-#### Development
-
-#### Testing
+### Testing
 
 
