@@ -118,8 +118,9 @@ minikube start
 ```
 eval $(minikube docker-env)
 ```
-3. **Configure Kubernetes image pull policy**. The default behavior of our Kubernetes deployments uses an [image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) of *Always* so that deployments triggered by the CD pipeline adopt the lastest Docker image uploaded to [Google Container Registry](https://cloud.google.com/container-registry). For local development, we don't want this behavior since in the previous step we decided to avoid publishing development images to a container registry. In the Kubernetes resource [file](./deployment.yml), the image pull policy for *spotifind-app* should be set as follows:
+3. **Configure Kubernetes image pull policy**. The default behavior of our Kubernetes deployments uses an [image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) of *Always* so that deployments triggered by the CD pipeline adopt the lastest Docker image uploaded to [Google Container Registry](https://cloud.google.com/container-registry). For local development, we don't want this behavior since in the previous step we decided to avoid publishing development images to a container registry. In the Kubernetes resource [file](./deployment.yml), the image and image pull policy for *spotifind-app* should be set as follows:
 ```
+image: spotifind:latest
 imagePullPolicy: Never
 ```
 4. **Enable gcp-auth to mount GCP credentials for use on local machine.** [gcp-auth](https://minikube.sigs.k8s.io/docs/handbook/addons/gcp-auth/) is a minikube addon needed to mount GCP credentials onto all Kubernetes pods. Since we use service account keys for machine to machine authentication, this is a necessary step to avoid *4xx* (likely *401*) status codes in development. The following command is sufficient to install the gcp-auth addon:
@@ -137,12 +138,22 @@ GET::127.0.0.1:80/health
 ```
 8. **Build a new Docker image and deploy**. After confirming that minikube is properly running our service, the following shell commands can be used in order to adopt new changes on our service in minikube (this will rebuild the Kubernetes namespace, create a new Docker image with changes, and redeploy changes in minikube):
 ```
-kubectl delete namespace spotifind \
-docker build -t spotifind-app:latest . \
-minikube image load spotifind-app:latest \
+kubectl delete namespace spotifind &&
+docker build -t spotifind:latest . &&
 kubectl apply -f deployment.yml
 ```
 
 ### Testing
+
+#### Unit testing
+
+For unit tests, we currently run all test suites outside of the Docker container (this is something that can be improved). In order to run a unit test regression, the same command in our [Github workflow](./.github/workflows/ci_pipeline.yml) can be used:
+```
+python -m unittest discover test/unit_tests/
+```
+
+#### Integration testing
+
+Integration tests currently run on the CD, but it is suggested to run integrations tests prior to this to avoid having to revert breaking changes. Since the ANN index service is currently deployed behind a Virtual Private Cloud, all integration tests currently need to be run on a cluster in Google Cloud. To run integration tests, a Kubernetes cluster on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine) can be provisioned. From Google Cloud Build, the *GKE-Continuous-Deployment* pipeline can be copied and changed to run on a separate branch. After making these changes, commits added to the remote (this) repository will trigger a new CD pipeline run in Google Cloud.
 
 
