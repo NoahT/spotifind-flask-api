@@ -103,6 +103,35 @@ Spotifind API makes use of the following stack. Feel free to install these with 
 
 ### Development
 
+#### Branching strategy
+Before making any changes on this project, please make sure to follow the branching strategy established. We currently are unable to set up branch protections since this is a private repository, so good Git hygiene is necessary. For this repository, we use [Github flow](https://docs.github.com/en/get-started/quickstart/github-flow) which is a relatively straightforward branching strategy for new changes we want to introduce on the trunk.
+
+### Making changes
+
+The following is a general strategy that can be adopted when adding new changes during development:
+ 
+1. **Start minikube**. As a quickstart, this part of the documentation can be used to start a [local Kubernetes cluster](https://minikube.sigs.k8s.io/docs/commands/start/). No flags are needed here so the following can be used:
+```
+minikube start
+```
+2. **Configure docker-cli to build images directly inside minikube**. This is done so that we can avoid having to push local Docker images to a container registry solely for development. The documentation for [docker-env](https://minikube.sigs.k8s.io/docs/commands/docker-env/) gives additional context; for our use case the following command is sufficient:
+```
+eval $(minikube docker-env)
+```
+3. **Configure Kubernetes image pull policy**. The default behavior of our Kubernetes deployments uses an [image pull policy](https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy) of *Always* so that deployments triggered by the CD pipeline adopt the lastest Docker image uploaded to [Google Container Registry](https://cloud.google.com/container-registry). For local development, we don't want this behavior since in the previous step we decided to avoid publishing development images to a container registry. In the Kubernetes resource [file](./deployment.yml), the image pull policy for *spotifind-app* should be set as follows:
+```
+imagePullPolicy: Never
+```
+4. **Enable gcp-auth to mount GCP credentials for use on local machine.** [gcp-auth](https://minikube.sigs.k8s.io/docs/handbook/addons/gcp-auth/) is a minikube addon needed to mount GCP credentials onto all Kubernetes pods. Since we use service account keys for machine to machine authentication, this is a necessary step to avoid *4xx* (likely *401*) status codes in development. The following command is sufficient to install the gcp-auth addon:
+```
+minikube addons enable gcp-auth
+```
+5. **Enable Ingress for edge routing.** [Ingress](https://kubernetes.io/docs/concepts/services-networking/ingress/) is a special type of resource in Kubernetes that we use for load balancing and external access: in other words we need an endpoint to hit from the minikube Kubernetes cluster on our local machine to verify our changes. To do this from minikube, the [ingress-minikube](https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/) addon needs to be installed.
+6. **Tunnel with minikube to expose ingress load balancer.** To expose our service from minikube to the operating system on our local machine we use [minikube tunnel](https://minikube.sigs.k8s.io/docs/handbook/accessing/#using-minikube-tunnel). From a separate shell session, the following command needs to execute prior to testing changes:
+```
+minikube tunnel
+```
+
 ### Testing
 
 
