@@ -131,6 +131,17 @@ minikube addons enable gcp-auth
 ```
 minikube tunnel
 ```
+7. **Run a smoke test.** This is just a shallow but broad test that makes sure the service is running at minimum. We do this to verify the stability of the current build prior to making changes, which is often useful for debugging issues found afterwards. For example, the following endpoint is a health check resource that can be called for this step:
+```
+GET::127.0.0.1:80/health
+```
+8. **Build a new Docker image and deploy**. After confirming that minikube is properly running our service, the following shell commands can be used in order to adopt new changes on our service in minikube (this will rebuild the Kubernetes namespace, create a new Docker image with changes, and redeploy changes in minikube):
+```
+kubectl delete namespace spotifind \
+docker build -t spotifind-app:latest . \
+minikube image load spotifind-app:latest \
+kubectl apply -f deployment.yml
+```
 
 ### Testing
 
