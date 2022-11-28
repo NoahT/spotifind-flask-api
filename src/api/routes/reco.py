@@ -119,6 +119,7 @@ reco = Blueprint('reco', __name__)
 })
 def id(id):
     response = None
+    size = request.args.get(key='size') or str(5)
 
     response_builder_factory = ResponseBuilderFactory()
     try:
@@ -132,7 +133,6 @@ def id(id):
         client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
         reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
         
-        size = request.args.get(key='size') or str(5)
         
         response = reco_adapter.get_recos(id=id, size=size)
     except Exception as exception:
