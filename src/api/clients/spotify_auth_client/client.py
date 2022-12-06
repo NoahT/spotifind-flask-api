@@ -28,7 +28,7 @@ class SpotifyAuthClient(Client):
         token = self.get_bearer_token_from_cache(key='public')
         return token
     
-    @cached(cache=TTLCache(maxsize=1, ttl=60))
+    @cached(cache=TTLCache(maxsize=1, ttl=3600))
     def get_bearer_token_from_cache(self, key='public') -> dict:
         # By default public scope is only scope we can use for client credentials. When we look into adding a
         # resource for creating playlists we will need to use a new authentication flow that propagates a token
