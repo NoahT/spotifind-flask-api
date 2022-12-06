@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 from google.cloud import secretmanager
+from cachetools import cached
+from cachetools import TTLCache
 import google_crc32c
 import os
 import requests
@@ -20,9 +22,17 @@ class SpotifyAuthClient(Client):
         self._client_id = os.environ['CLIENT_ID']
         self._secret_id = os.environ['SECRET_ID']
         self._secret_version_id = os.environ['SECRET_VERSION_ID']
-        self.logger = logging_client.get_logger(self.__class__.__name__)
+        self._logger = logging_client.get_logger(self.__class__.__name__)
 
     def get_bearer_token(self) -> dict:
+        token = self.get_bearer_token_from_cache(key='public')
+        return token
+    
+    @cached(cache=TTLCache(maxsize=1, ttl=60))
+    def get_bearer_token_from_cache(self, key='public') -> dict:
+        # By default public scope is only scope we can use for client credentials. When we look into adding a
+        # resource for creating playlists we will need to use a new authentication flow that propagates a token
+        # with the correct authorization scope in the request headers
         endpoint = '{}{}'.format(self._hostname, self._api_token_path)
         basic_token = self.get_basic_token()
         basic_auth = 'Basic {}'.format(basic_token)
@@ -70,7 +80,7 @@ class SpotifyAuthClient(Client):
         crc32c = google_crc32c.Checksum()
         crc32c.update(response.payload.data)
         if response.payload.data_crc32c != int(crc32c.hexdigest(), 16):
-            self.logger.log('Data corruption detected.', severity='WARNING')
+            self._logger.log('Data corruption detected.', severity='WARNING')
             return response
 
         payload = response.payload.data.decode('UTF-8')
