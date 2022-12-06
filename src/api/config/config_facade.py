@@ -2,8 +2,10 @@ import flask
 
 class ConfigFacade():
     def __init__(self) -> None:
-        self.environment = flask.current_app.config['ENVIRONMENT']
-        self.match_service_enabled = flask.current_app.config['MATCH_SERVICE_ENABLED']
+        app = flask.current_app
+        with app.app_context():
+            self.environment = flask.current_app.config['ENVIRONMENT']
+            self.match_service_enabled = flask.current_app.config['MATCH_SERVICE_ENABLED']
     
     def get_environment(self) -> str:
         return self.environment
