@@ -23,6 +23,7 @@ spotify_client = SpotifyClient(auth_client=spotify_auth_client, logging_client=l
 client_aggregator = ClientAggregator(config_facade=config_facade, mock_match_service_client=MockMatchServiceClient, match_service_client=MatchServiceClient)
 reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
 
+@reco.route('/<id>', methods=['GET'])
 def id(id):
     response = None
     size = request.args.get(key='size') or str(5)
