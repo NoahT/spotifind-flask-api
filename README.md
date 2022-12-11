@@ -27,7 +27,7 @@ Spotifind is a REST web service. Any HTTP client can be used in order to interfa
 ### Endpoints
 Spotifind API is exposed behind two endpoints:
 
-1. **34.160.143.178 (external IP)**: This is our external IP currently configured in Google Cloud for edge routing (this is prone to change since we have not yet configured a domain). This is currently deployed in the [us-west1-c zone](https://cloud.google.com/compute/docs/regions-zones).
+1. **spotifind-api.com**: This is our endpoint configured in Google Cloud.
 2. **localhost (loopback address)**: This is used during development on a local machine.
 
 ### Resources
