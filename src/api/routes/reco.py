@@ -9,6 +9,8 @@ from ..clients.logging_client.client import LoggingClient
 from ..schemas.response import ResponseBuilderFactory
 from ..util.reco_adapter import V1RecoAdapter
 
+import json
+
 reco = Blueprint('reco', __name__)
 
 response_builder_factory = ResponseBuilderFactory()
@@ -33,6 +35,6 @@ def id(id):
     except Exception:
         response = response_builder_factory.get_builder(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(recos_response=None, id=id, size=size)
     finally:
-        print(response.__str__())
+        print(json.dumps(response.response))
 
     return response.response, response.response_code
