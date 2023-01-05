@@ -1,6 +1,7 @@
 from abc import abstractmethod
 from http import HTTPStatus
 from abc import ABC
+import json
 
 class Response():
     def __init__(self, response: dict, response_code: int) -> None:
@@ -50,7 +51,7 @@ class OkResponseBuilder(ResponseBuilder):
         self._response_code = HTTPStatus.OK.value
     
     def build_response(self, recos_response: dict, id: str, size: int) -> Response:
-        print(recos_response.__str__())
+        print(json.dumps(recos_response))
         response = {
             'request': {
                 'track': {

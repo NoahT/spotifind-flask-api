@@ -44,3 +44,5 @@ images:
 - gcr.io/${PROJECT_ID}/spotifind-integration-test
 options:
   logging: CLOUD_LOGGING_ONLY
+  pool:
+    name: 'projects/spotifind-api/locations/us-west1/workerPools/spotifind-api-private-pool'

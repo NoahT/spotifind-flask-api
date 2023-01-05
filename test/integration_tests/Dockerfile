@@ -13,5 +13,6 @@ ENV PROJECT_NAME="spotifind-api"
 ENV CLIENT_ID="081f994d972f46519c1c8f9f6f11102a"
 ENV SECRET_ID="spotify-rest-api-secret"
 ENV SECRET_VERSION_ID="latest"
+ENV ENVIRONMENT="staging"
 
 CMD [ "python3", "-m", "unittest", "discover", "-s", "./test/integration_tests/" ]
