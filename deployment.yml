@@ -45,6 +45,38 @@ spec:
           value: "latest"
         - name: ENVIRONMENT
           value: "staging"
+      # Sidecar container for warmups. We take this example directly from the expedia group documentation
+      # https://opensource.expediagroup.com/mittens/docs/installation/running#run-as-a-sidecar-on-kubernetes
+      - name: mittens
+        image: expediagroup/mittens:latest
+        resources:
+          limits:
+            memory: 50Mi
+            cpu: 50m
+          requests:
+            memory: 50Mi
+            cpu: 50m
+        readinessProbe:
+          exec:
+            command:
+            - "cat"
+            - "ready"
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        livenessProbe:
+          exec:
+            command:
+            - "cat"
+            - "alive"
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        args:
+        - "--concurrency=1"
+        - "--exit-after-warmup=true"
+        - "--max-duration-seconds=60"
+        - "--target-http-port=5000"
+        - "--http-requests=get:/health"
+        - "--http-requests=get:/v1/reco/3qZlWVmqyr9BkZ6y4tdtsD?size=10"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
