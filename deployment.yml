@@ -70,10 +70,8 @@ spec:
             cpu: 50m
         args:
         - "--concurrency=1"
-        - "--max-duration-seconds=120"
         - "--max-readiness-wait-seconds=60"
-        - "--max-warmup-seconds=60"
-        - "--exit-after-warmup=true"
+        - "--max-warmup-seconds=30"
         - "--fail-readiness=true"
         - "--file-probe-enabled=false"
         - "--target-readiness-http-path=/health"
