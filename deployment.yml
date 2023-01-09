@@ -68,27 +68,20 @@ spec:
           requests:
             memory: 50Mi
             cpu: 50m
-        readinessProbe:
-          exec:
-            command:
-            - "cat"
-            - "ready"
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        livenessProbe:
-          exec:
-            command:
-            - "cat"
-            - "alive"
-          initialDelaySeconds: 10
-          periodSeconds: 30
         args:
         - "--concurrency=1"
+        - "--max-duration-seconds=120"
+        - "--max-readiness-wait-seconds=60"
+        - "--max-warmup-seconds=60"
         - "--exit-after-warmup=true"
-        - "--max-duration-seconds=60"
+        - "--fail-readiness=true"
+        - "--file-probe-enabled=false"
+        - "--target-readiness-http-path=/health"
+        - "--target-readiness-http-host=http://localhost"
+        - "--target-readiness-port=5000"
+        - "--target-http-host=http://localhost"
         - "--target-http-port=5000"
-        - "--http-requests=get:/health"
-        - "--http-requests=get:/v1/reco/3qZlWVmqyr9BkZ6y4tdtsD?size=10"
+        - "--http-requests=get:/v1/reco/7cNNUbN90ArXvrfVUcdIO9?size=10"
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
