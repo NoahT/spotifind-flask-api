@@ -71,7 +71,7 @@ Response:
         }
     ],
     "request": {
-        "size": "5",
+        "size": 5,
         "track": {
             "id": "2TRu7dMps7cVKOyazkj9Fb"
         }
