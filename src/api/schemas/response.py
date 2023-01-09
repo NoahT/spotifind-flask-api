@@ -61,10 +61,12 @@ class OkResponseBuilder(ResponseBuilder):
             }
         }
         recos = []
-        for reco in recos_response['neighbor']:
-            recos.append({ 'id': reco['id'] })
+        neighbors = recos_response['neighbor']
+        for reco in neighbors:
+            if id != reco['id']:
+                recos.append({ 'id': reco['id'] })
         
-        response['recos'] = recos
+        response['recos'] = recos[:size]
 
         return Response(response=response, response_code=self._response_code)
 

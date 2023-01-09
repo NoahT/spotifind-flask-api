@@ -93,24 +93,57 @@ class ResponseBuilderTestSuite(unittest.TestCase):
                 },
                 {
                     "id": "3x7gMvCsL1SS6THGwB55Pm"
+                }
+            ],
+            "request": {
+                "size": 2,
+                "track": {
+                    "id": "123"
+                }
+            }
+        }
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos_dict, id='123', size=2)
+
+        self.assertEqual(expected_response, ok_response.response)
+        self.assertEqual(200, ok_response.response_code)
+    
+    def test_should_properly_build_200_response_with_input_as_neighbor(self):
+        recos_dict = {
+            "neighbor": [
+                {
+                    "id": "123",
+                    "distance": 0.0
+                },
+                {
+                    "id": "3x7gMvCsL1SS6THGwB55Pm",
+                    "distance": 2.0
+                },
+                {
+                    "id": "7sLQGgXFs4LaGAaDErPwOl",
+                    "distance": 5.0
+                }
+            ]
+        }
+        expected_response = {
+            "recos": [
+                {
+                    "id": "3x7gMvCsL1SS6THGwB55Pm"
                 },
                 {
                     "id": "7sLQGgXFs4LaGAaDErPwOl"
                 }
             ],
             "request": {
-                "size": 5,
+                "size": 2,
                 "track": {
                     "id": "123"
                 }
             }
         }
-        ok_response = response.OkResponseBuilder().build_response(recos_response=recos_dict, id='123', size=5)
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos_dict, id='123', size=2)
 
         self.assertEqual(expected_response, ok_response.response)
         self.assertEqual(200, ok_response.response_code)
-
-        
 
 if __name__ == '__main__':
     unittest.main()

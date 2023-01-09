@@ -19,7 +19,7 @@ class RecosAPITestSuite(unittest.TestCase):
         self.assertIsNotNone(request)
         self.assertEqual(request,
         {
-            'size': '5',
+            'size': 5,
             'track': {
                 'id': '3L4KeuZsCf5PHkXPvvvCQG'
             }
@@ -39,7 +39,7 @@ class RecosAPITestSuite(unittest.TestCase):
         self.assertIsNotNone(request)
         self.assertEqual(request,
         {
-            'size': '50',
+            'size': 50,
             'track': {
                 'id': '3L4KeuZsCf5PHkXPvvvCQG'
             }
