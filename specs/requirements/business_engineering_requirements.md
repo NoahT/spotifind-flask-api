@@ -1,31 +1,11 @@
-# Business and Engineering Requirements (6/20/22)
+# Business and Engineering Requirements (1/10/23)
 We are primarily interested in briefly documenting business and engineering requirements for this web application to constrain our problem space.
 
-## Design Requirements
-- Assume all end users have a Spotify account
-- Assume fewer than 1000 playlists created per day
-- Assume playlist size will be constrained to 50 songs.
-- Assume playlist creation has an SLA of 10 seconds end to end.
-
-## Capacity Estimates
-- From design requirements, we assume 1000 playlists per day.
-  - Song metadata must be passed upstream after using Spotify's bulk API, so we estimate capacity in terms of songs.
-    - We empirically estimate 10 KB per song based on experience with Spotify playlists/tracks/follow APIs.
-  - 1000 playlists per day, 50 songs for every playlist ~ 5000 songs/day ~ 50000 KB/day ~ 0.5787 KB/sec
-    - With buffer, we estimate a bandwidth of 1.5(0.5787 KB/sec) ~ 0.86 KB/sec on average.
-
-## High Level Design
-- Recommendations are made on a single song, so a bulk API is not needed.
-  - Response time may vary based on the playlist size.
-- A gateway is not needed here since we can enforce versioning for our API endpoints for backwards-incompatible changes.
-- We use Vertex AI for recommendations for track embeddings.
-  - Since Vertex AI offers low-latent recommendations, we will default to round robin for our load balancing strategy.
-
 ## Component Level Design
-### /v1/reco/{id*}
+### GET::/v1/reco/{id*}
 | Resource  | Description | Type | Parameters |
 | ------------- | ------------- | ------------- | ------------- |
-| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate. Default size 10 | 
+| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations <br> **size** - Number of recommendations to return. Default size 5 | 
 
 #### HTTP response status codes
 | Status code | Description |
@@ -68,7 +48,7 @@ We are primarily interested in briefly documenting business and engineering requ
     },
     {
       "id": "2HbKqm4o0w5wEeEFXm2sD4"
-    },
+    }
   ]
 }
 ```
@@ -98,9 +78,70 @@ We are primarily interested in briefly documenting business and engineering requ
 }
 ```
 
+### POST::/v1/playlist/{id*}
+| Resource  | Description | Type | Parameters |
+| ------------- | ------------- | ------------- | ------------- |
+| /v1/playlist/{id*}  | Create Spotify playlist with recommended tracks based on the given track id | POST | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate. Default size 5 | 
+
+#### HTTP response status codes
+| Status code | Description |
+| ------------- | ------------- |
+| 201  | When Spotify playlist is created successfully |
+| 400  | Miscellaneous client failure |
+| 401  | Client failure due to missing `Authorization` header |
+| 403  | Client failure due to insufficient scopes in `Authorization` header |
+| 404  | Client failure due to invalid track id |
+| 500  | Miscellaneous service failure |
+
+#### Request headers
+| Request header | Value(s) |
+| ------------- | ------------- |
+| Authorization  | Bearer {token}, where `token` is a Bearer token from [Spotify](https://developer.spotify.com/documentation/general/guides/authorization/scopes/) with [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public), [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes |
+
+#### Response headers
+| Request header | Value(s) |
+| ------------- | ------------- |
+| Location  | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
+
+#### Sample requests
+**Request**
+/v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5
+
+**Response (201)**
+
+(Note that the response body is intentionally empty.)
+```
+```
+
+**Request**
+/v1/reco/invalid_id
+**Response (404)**
+```
+{
+  "error": {
+    "status": 404,
+    "message": "Invalid track id."
+  }
+}
+```
+
+**Request**
+/v1/invalid_resource
+
+**Response (404)**
+```
+{
+  "error": {
+    "status": 400,
+    "message": "Bad request."
+  }
+}
+```
+
 ## Spotify APIs (third party)
-Spotify's ReST APIs are the only third party APIs being used. Their documentation is sufficient substitution for markdown:
-- [Playlist API](https://developer.spotify.com/console/post-playlists/)
-- [Tracks API](https://developer.spotify.com/console/get-several-tracks/)
-- [Follow API](https://developer.spotify.com/console/put-playlist-followers/)
+Spotify's REST APIs are the only third party APIs being used. Their documentation is sufficient substitution for markdown:
+- [Authorization API](https://developer.spotify.com/documentation/general/guides/authorization/client-credentials/)
+- [Audio Features API](https://developer.spotify.com/console/get-audio-features-track/)
+- [Create Playlist API](https://developer.spotify.com/console/post-playlists/)
+- [Playlist Tracks API](https://developer.spotify.com/console/post-playlist-tracks/)
 
