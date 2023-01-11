@@ -46,36 +46,80 @@ Spotifind API is exposed behind two endpoints:
 | 500  | Miscellaneous service failure |
 
 ### Example Usage
-Request:
+**Request**
 ```
-GET::{{host}}/v1/reco/2TRu7dMps7cVKOyazkj9Fb?size=5
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTP/1.1
+Host: spotifind-api.com
 ```
-Response:
+
+**Response (200)**
 ```
+HTTP/1.1 200 OK
+Content-Type: application/json
+. . . // Miscellaneous response headers
+
 {
-    "recos": [
-        {
-            "id": "4JnCD65HeEbeTumgu6xEl3"
-        },
-        {
-            "id": "0iCxoVGB01iGIBgyFgovyt"
-        },
-        {
-            "id": "72rc5PamxGNcNcFMBkZosp"
-        },
-        {
-            "id": "6VGGUt2yqHqrEnEeKrIkJM"
-        },
-        {
-            "id": "4HpsRlpQ7Rj70Jo2d0yYBV"
-        }
-    ],
-    "request": {
-        "size": 5,
-        "track": {
-            "id": "2TRu7dMps7cVKOyazkj9Fb"
-        }
+  "request": {
+    "track": {
+      "id": "62BGM9bNkNcvOh13B4wOyr"
+    },
+    "size": 5
+  },
+  "recos": [
+    {
+      "id": "2TRu7dMps7cVKOyazkj9Fb"
+    },
+    {
+      "id": "0bqrFwY1HixfnusFxhYbDl"
+    },
+    {
+      "id": "4BHSjbYylfOH5WAGusDyni"
+    },
+    {
+      "id": "3s9f1LQ6607eDj9UYCzmgk"
+    },
+    {
+      "id": "2HbKqm4o0w5wEeEFXm2sD4"
     }
+  ]
+}
+```
+
+**Request**
+```
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=invalid_size HTTP/1.1
+Host: spotifind-api.com
+```
+
+**Response (400)**
+```
+HTTP/1.1 400 BAD REQUEST
+. . . // Miscellaneous response headers
+
+{
+  "error": {
+    "status": 400,
+    "message": "Bad request."
+  }
+}
+```
+
+**Request**
+```
+GET /v1/reco/invalid_id HTTP/1.1
+Host: spotifind-api.com
+```
+
+**Response (404)**
+```
+HTTP/1.1 404 NOT FOUND
+. . . // Miscellaneous response headers
+
+{
+  "error": {
+    "status": 404,
+    "message": "Invalid track id."
+  }
 }
 ```
 
