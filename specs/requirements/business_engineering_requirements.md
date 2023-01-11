@@ -22,10 +22,17 @@ We are primarily interested in briefly documenting business and engineering requ
 
 #### Sample requests
 **Request**
-/v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5
+```
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTP/1.1
+Host: spotifind-api.com
+```
 
 **Response (200)**
 ```
+HTTP/1.1 200 OK
+Content-Type: application/json
+. . . // Miscellaneous response headers
+
 {
   "request": {
     "track": {
@@ -54,26 +61,39 @@ We are primarily interested in briefly documenting business and engineering requ
 ```
 
 **Request**
-/v1/reco/invalid_id
-**Response (404)**
 ```
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=invalid_size HTTP/1.1
+Host: spotifind-api.com
+```
+
+**Response (400)**
+```
+HTTP/1.1 400 BAD REQUEST
+. . . // Miscellaneous response headers
+
 {
   "error": {
-    "status": 404,
-    "message": "Invalid track id."
+    "status": 400,
+    "message": "Bad request."
   }
 }
 ```
 
 **Request**
-/v1/invalid_resource
+```
+GET /v1/reco/invalid_id HTTP/1.1
+Host: spotifind-api.com
+```
 
 **Response (404)**
 ```
+HTTP/1.1 404 NOT FOUND
+. . . // Miscellaneous response headers
+
 {
   "error": {
-    "status": 400,
-    "message": "Bad request."
+    "status": 404,
+    "message": "Invalid track id."
   }
 }
 ```
@@ -105,18 +125,33 @@ We are primarily interested in briefly documenting business and engineering requ
 
 #### Sample requests
 **Request**
-/v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5
-
+```
+POST /v1/playlist/56PBFnmomWOmjg8eZulmMo?size=5 HTTP/1.1
+Host: spotifind-api.com
+Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
+```
 **Response (201)**
 
 (Note that the response body is intentionally empty.)
 ```
+HTTP/1.1 201 Created
+. . . // Miscellaneous response headers
+Location: https://api.spotify.com/v1/playlists/5Rfv2LUBWVu0llq1Oze6yH
+. . . // Rest of HTTP message
 ```
 
 **Request**
-/v1/reco/invalid_id
+```
+POST /v1/playlist/invalid_id HTTP/1.1
+Host: spotifind-api.com
+Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
+```
+
 **Response (404)**
 ```
+HTTP/1.1 404 Not Found
+. . . // Miscellaneous response headers
+
 {
   "error": {
     "status": 404,
@@ -126,14 +161,42 @@ We are primarily interested in briefly documenting business and engineering requ
 ```
 
 **Request**
-/v1/invalid_resource
-
-**Response (404)**
 ```
+POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTP/1.1
+Host: spotifind-api.com
+```
+
+**Response (401)**
+```
+HTTP/1.1 401 Unauthorized.
+. . . // Miscellaneous response headers
+
 {
   "error": {
-    "status": 400,
-    "message": "Bad request."
+    "status": 401,
+    "message": "Valid authentication credentials not provided."
+  }
+}
+```
+
+**Request**
+
+Suppose `insufficient_token` is a token missing the [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public) or [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes.
+```
+POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTP/1.1
+Host: spotifind-api.com
+Authorization: Bearer insufficient_token
+```
+
+**Response (403)**
+```
+HTTP/1.1 403 Forbidden
+. . . // Miscellaneous response headers
+
+{
+  "error": {
+    "status": 403,
+    "message": "Insufficient authentication credentials."
   }
 }
 ```
