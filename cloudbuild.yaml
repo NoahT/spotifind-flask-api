@@ -24,7 +24,7 @@ steps:
   args:
     - '-c'
     - |
-      if ["$_SKIP_TESTS" != "true"]; then
+      if [ "$_SKIP_TESTS" != "true" ]; then
         gcloud run --network=cloudbuild gcr.io/$PROJECT_ID/spotifind-integration-test
       fi
 # Build container image for deploy component in Kubeflow
