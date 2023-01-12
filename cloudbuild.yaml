@@ -20,7 +20,13 @@ steps:
 # Deploy container image for integration tests
 - id: 'Deploy Docker image for spotifind API integration tests'
   name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--network=cloudbuild', 'gcr.io/${PROJECT_ID}/spotifind-integration-test']
+  entrypoint: bash
+  args:
+    - '-c'
+    - |
+      if [ "$_SKIP_TESTS" != "true" ]; then
+        docker run --network=cloudbuild gcr.io/$PROJECT_ID/spotifind-integration-test
+      fi
 # Build container image for deploy component in Kubeflow
 - id: 'Build Docker image for Kubeflow deploy component'
   name: 'gcr.io/cloud-builders/docker'
