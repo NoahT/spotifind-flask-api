@@ -56,7 +56,7 @@ spec:
         - name: SECRET_VERSION_ID
           value: "latest"
         - name: ENVIRONMENT
-          value: "development"
+          value: "staging"
       # Sidecar container for warmups. We take this example directly from the expedia group documentation
       # https://opensource.expediagroup.com/mittens/docs/installation/running#run-as-a-sidecar-on-kubernetes
       - name: mittens
