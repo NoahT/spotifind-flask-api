@@ -1,4 +1,12 @@
 {
     "ENVIRONMENT": "development",
-    "MATCH_SERVICE_ENABLED": false
+    "MATCH_SERVICE_ENABLED": false,
+    "SPOTIFY_AUTH_CLIENT_CONFIG": {
+        "CONNECT_TIMEOUT": 0.500,
+        "READ_TIMEOUT": 1.000
+    },
+    "SPOTIFY_CLIENT_CONFIG": {
+        "CONNECT_TIMEOUT": 0.500,
+        "READ_TIMEOUT": 0.500
+    }
 }

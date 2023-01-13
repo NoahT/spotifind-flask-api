@@ -1,15 +1,31 @@
 import unittest
+import flask
 from unittest.mock import Mock
 from src.api.clients.spotify_client.client import SpotifyClient
 from src.api.clients.spotify_auth_client.client import SpotifyAuthClient
 from src.api.clients.logging_client.client import LoggingClient
+from src.api.config.config_facade import ConfigFacade
 import requests.exceptions as exceptions
 
 class SpotifyClientTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         logging_client = LoggingClient()
-        auth_client = SpotifyAuthClient(logging_client=logging_client)
-        self.spotify_client = SpotifyClient(auth_client=auth_client, logging_client=logging_client)
+
+        flask_app = flask.Flask(__name__)
+        flask_app.config['MATCH_SERVICE_ENABLED'] = True
+        flask_app.config['ENVIRONMENT'] = 'staging'
+        flask_app.config['SPOTIFY_AUTH_CLIENT_CONFIG'] = {
+            "CONNECT_TIMEOUT": 0.500,
+            "READ_TIMEOUT": 1.000
+        }
+        flask_app.config['SPOTIFY_CLIENT_CONFIG'] = {
+            "CONNECT_TIMEOUT": 0.500,
+            "READ_TIMEOUT": 1.000
+        }
+        with flask_app.app_context():
+            config_facade = ConfigFacade()
+            auth_client = SpotifyAuthClient(logging_client=logging_client, config_facade=config_facade)
+            self.spotify_client = SpotifyClient(auth_client=auth_client, logging_client=logging_client, config_facade=config_facade)
     
     def test_should_return_response_for_valid_track_id_on_v1_tracks(self) -> None:
         response = self.spotify_client.v1_tracks('62BGM9bNkNcvOh13B4wOyr')

@@ -16,7 +16,12 @@ class SpotifyClientTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         logging_client = Mock()
         auth_client = Mock()
-        self._spotify_client = spotify_client.SpotifyClient(auth_client, logging_client)
+        config_facade = Mock()
+        config_facade.get_spotify_client_config.return_value = {
+            'CONNECT_TIMEOUT': 0.500,
+            'READ_TIMEOUT': 0.500
+        }
+        self._spotify_client = spotify_client.SpotifyClient(auth_client, logging_client, config_facade)
         self._response = requests.Response()
     
     def test_should_raise_error_for_4xx_response_on_v1_tracks(self):
@@ -73,7 +78,12 @@ class SpotifyClientTestSuite(unittest.TestCase):
             'access_token': 'token'
         }
         logging_client = Mock()
-        self._spotify_client = spotify_client.SpotifyClient(auth_client, logging_client)
+        config_facade = Mock()
+        config_facade.get_spotify_client_config.return_value = {
+            'CONNECT_TIMEOUT': 0.500,
+            'READ_TIMEOUT': 0.500
+        }
+        self._spotify_client = spotify_client.SpotifyClient(auth_client, logging_client, config_facade)
 
         bearer_token = self._spotify_client.get_bearer_token()
 
