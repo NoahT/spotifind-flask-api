@@ -1,13 +1,28 @@
 import unittest
+import flask
 from unittest.mock import Mock
 from src.api.clients.spotify_auth_client.client import SpotifyAuthClient
 from src.api.clients.logging_client.client import LoggingClient
+from src.api.config.config_facade import ConfigFacade
 from requests import HTTPError
 
 class SpotifyClientTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         logging_client = LoggingClient()
-        self.auth_client = SpotifyAuthClient(logging_client=logging_client)
+        flask_app = flask.Flask(__name__)
+        flask_app.config['MATCH_SERVICE_ENABLED'] = True
+        flask_app.config['ENVIRONMENT'] = 'staging'
+        flask_app.config['SPOTIFY_AUTH_CLIENT_CONFIG'] = {
+            "CONNECT_TIMEOUT": 0.500,
+            "READ_TIMEOUT": 1.000
+        }
+        flask_app.config['SPOTIFY_CLIENT_CONFIG'] = {
+            "CONNECT_TIMEOUT": 0.500,
+            "READ_TIMEOUT": 1.000
+        }
+        with flask_app.app_context():
+            config_facade = ConfigFacade()
+            self.auth_client = SpotifyAuthClient(logging_client=logging_client, config_facade=config_facade)
     
     def test_should_return_bearer_token_for_valid_basic_authorization(self) -> None:
         bearer_token_dict = self.auth_client.get_bearer_token()
