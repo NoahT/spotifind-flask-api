@@ -16,7 +16,13 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         logging_client = Mock()
         logging_client.get_logger.return_value = Mock()
-        self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient(logging_client)
+        
+        config_facade = Mock()
+        config_facade.get_spotify_auth_client_config.return_value = {
+            'CONNECT_TIMEOUT': 0.500,
+            'READ_TIMEOUT': 1.000
+        }
+        self._spotify_auth_client = spotify_auth_client.SpotifyAuthClient(logging_client, config_facade)
         self._response = requests.Response()
     
     def test_should_raise_error_for_4xx_response(self):

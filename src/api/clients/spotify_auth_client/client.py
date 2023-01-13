@@ -8,6 +8,7 @@ import requests
 import base64
 
 from ..logging_client.client import LoggingClient
+from ...config.config_facade import ConfigFacade
 
 class Client(ABC):
     @abstractmethod
@@ -15,7 +16,7 @@ class Client(ABC):
         pass
 
 class SpotifyAuthClient(Client):
-    def __init__(self, logging_client: LoggingClient):
+    def __init__(self, logging_client: LoggingClient, config_facade: ConfigFacade):
         self._hostname = 'https://accounts.spotify.com'
         self._api_token_path = '/api/token'
         self._project_id = os.environ['PROJECT_ID']
@@ -23,6 +24,7 @@ class SpotifyAuthClient(Client):
         self._secret_id = os.environ['SECRET_ID']
         self._secret_version_id = os.environ['SECRET_VERSION_ID']
         self._logger = logging_client.get_logger(self.__class__.__name__)
+        self._config_facade = config_facade
 
     def get_bearer_token(self) -> dict:
         token = self.get_bearer_token_from_cache(key='public')
@@ -41,12 +43,19 @@ class SpotifyAuthClient(Client):
 
         headers = self.get_headers(basic_auth)
 
-        response = requests.post(endpoint, headers=headers, data=form_urlencoded)
+        response = requests.post(endpoint, headers=headers, data=form_urlencoded, timeout=self.get_timeouts())
         response.raise_for_status()
         response_json = response.json()
 
         return response_json
     
+    def get_timeouts(self) -> tuple:
+        spotify_auth_client_config = self._config_facade.get_spotify_auth_client_config()
+        read_timeout = spotify_auth_client_config['READ_TIMEOUT']
+        connect_timeout = spotify_auth_client_config['CONNECT_TIMEOUT']
+
+        return (connect_timeout, read_timeout)
+
     def get_basic_token(self) -> str:
         secret = self.access_secret_version()
         credentials = '{}:{}'.format(self._client_id, secret)
