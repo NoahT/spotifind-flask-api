@@ -141,6 +141,7 @@ apiVersion: networking.gke.io/v1
 kind: ManagedCertificate
 metadata:
   name: spotifind-external-load-balancer-managed-cert
+  namespace: spotifind
 spec:
   domains:
     - spotifind-api.com
