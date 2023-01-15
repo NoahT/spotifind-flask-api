@@ -25,7 +25,7 @@ Below is the current iteration for the system architecture. The core components 
 Spotifind is a REST web service. Any HTTP client can be used in order to interface with the API. A Postman collection for the existing resources can be found [here](https://www.getpostman.com/collections/3227a5bf7a781f5bfd65).
 
 ### Endpoints
-Spotifind API is exposed behind two endpoints:
+Spotifind API is exposed behind two endpoints. Note that HTTPS is the required protocol:
 
 1. **spotifind-api.com**: This is our endpoint configured in Google Cloud.
 2. **localhost (loopback address)**: This is used during development on a local machine.
@@ -48,13 +48,13 @@ Spotifind API is exposed behind two endpoints:
 ### Example Usage
 **Request**
 ```
-GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTP/1.1
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (200)**
 ```
-HTTP/1.1 200 OK
+HTTPS/1.1 200 OK
 Content-Type: application/json
 . . . // Miscellaneous response headers
 
@@ -87,13 +87,13 @@ Content-Type: application/json
 
 **Request**
 ```
-GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=invalid_size HTTP/1.1
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=invalid_size HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (400)**
 ```
-HTTP/1.1 400 BAD REQUEST
+HTTPS/1.1 400 BAD REQUEST
 . . . // Miscellaneous response headers
 
 {
@@ -106,13 +106,13 @@ HTTP/1.1 400 BAD REQUEST
 
 **Request**
 ```
-GET /v1/reco/invalid_id HTTP/1.1
+GET /v1/reco/invalid_id HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (404)**
 ```
-HTTP/1.1 404 NOT FOUND
+HTTPS/1.1 404 NOT FOUND
 . . . // Miscellaneous response headers
 
 {
