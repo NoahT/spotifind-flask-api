@@ -125,6 +125,7 @@ metadata:
   annotations:
     networking.gke.io/managed-certificates: spotifind-external-load-balancer-managed-cert
     kubernetes.io/ingress.global-static-ip-name: spotifind-external-load-balancer-address
+    kubernetes.io/ingress.allow-http: "false"
 spec:
   rules:
   - http:
