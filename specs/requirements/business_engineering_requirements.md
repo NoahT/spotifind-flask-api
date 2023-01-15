@@ -23,13 +23,13 @@ We are primarily interested in briefly documenting business and engineering requ
 #### Sample requests
 **Request**
 ```
-GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTP/1.1
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (200)**
 ```
-HTTP/1.1 200 OK
+HTTPS/1.1 200 OK
 Content-Type: application/json
 . . . // Miscellaneous response headers
 
@@ -62,13 +62,13 @@ Content-Type: application/json
 
 **Request**
 ```
-GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=invalid_size HTTP/1.1
+GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=invalid_size HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (400)**
 ```
-HTTP/1.1 400 BAD REQUEST
+HTTPS/1.1 400 BAD REQUEST
 . . . // Miscellaneous response headers
 
 {
@@ -81,13 +81,13 @@ HTTP/1.1 400 BAD REQUEST
 
 **Request**
 ```
-GET /v1/reco/invalid_id HTTP/1.1
+GET /v1/reco/invalid_id HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (404)**
 ```
-HTTP/1.1 404 NOT FOUND
+HTTPS/1.1 404 NOT FOUND
 . . . // Miscellaneous response headers
 
 {
@@ -126,7 +126,7 @@ HTTP/1.1 404 NOT FOUND
 #### Sample requests
 **Request**
 ```
-POST /v1/playlist/56PBFnmomWOmjg8eZulmMo?size=5 HTTP/1.1
+POST /v1/playlist/56PBFnmomWOmjg8eZulmMo?size=5 HTTPS/1.1
 Host: spotifind-api.com
 Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
 ```
@@ -134,7 +134,7 @@ Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQk
 
 (Note that the response body is intentionally empty.)
 ```
-HTTP/1.1 201 Created
+HTTPS/1.1 201 Created
 . . . // Miscellaneous response headers
 Location: https://api.spotify.com/v1/playlists/5Rfv2LUBWVu0llq1Oze6yH
 . . . // Rest of HTTP message
@@ -142,14 +142,14 @@ Location: https://api.spotify.com/v1/playlists/5Rfv2LUBWVu0llq1Oze6yH
 
 **Request**
 ```
-POST /v1/playlist/invalid_id HTTP/1.1
+POST /v1/playlist/invalid_id HTTPS/1.1
 Host: spotifind-api.com
 Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
 ```
 
 **Response (404)**
 ```
-HTTP/1.1 404 Not Found
+HTTPS/1.1 404 Not Found
 . . . // Miscellaneous response headers
 
 {
@@ -162,13 +162,13 @@ HTTP/1.1 404 Not Found
 
 **Request**
 ```
-POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTP/1.1
+POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
 Host: spotifind-api.com
 ```
 
 **Response (401)**
 ```
-HTTP/1.1 401 Unauthorized.
+HTTPS/1.1 401 Unauthorized.
 . . . // Miscellaneous response headers
 
 {
@@ -183,14 +183,14 @@ HTTP/1.1 401 Unauthorized.
 
 Suppose `insufficient_token` is a token missing the [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public) or [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes.
 ```
-POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTP/1.1
+POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
 Host: spotifind-api.com
 Authorization: Bearer insufficient_token
 ```
 
 **Response (403)**
 ```
-HTTP/1.1 403 Forbidden
+HTTPS/1.1 403 Forbidden
 . . . // Miscellaneous response headers
 
 {

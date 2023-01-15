@@ -122,6 +122,10 @@ kind: Ingress
 metadata:
   name: ingress-load-balancer
   namespace: spotifind
+  annotations:
+    networking.gke.io/managed-certificates: spotifind-external-load-balancer-managed-cert
+    kubernetes.io/ingress.global-static-ip-name: spotifind-external-load-balancer-address
+    kubernetes.io/ingress.allow-http: "false"
 spec:
   rules:
   - http:
@@ -133,3 +137,13 @@ spec:
             name: spotifind-service
             port:
               number: 8080
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: spotifind-external-load-balancer-managed-cert
+  namespace: spotifind
+spec:
+  domains:
+    - spotifind-api.com
+    - www.spotifind-api.com # We also included CNAME in DNS configuration just in case.
