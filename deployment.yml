@@ -122,6 +122,8 @@ kind: Ingress
 metadata:
   name: ingress-load-balancer
   namespace: spotifind
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: spotifind-external-load-balancer-address
 spec:
   rules:
   - http:
