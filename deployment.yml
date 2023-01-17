@@ -30,20 +30,27 @@ spec:
       - name: spotifind-app
         image: gcr.io/spotifind-api/spotifind:latest
         imagePullPolicy: Always
+        resources:
+          limits:
+            memory: 128Mi
+            cpu: 75m
+          requests:
+            memory: 64Mi
+            cpu: 50m
         ports:
         - containerPort: 5000
         livenessProbe:
           httpGet:
             path: /health
             port: 5000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          initialDelaySeconds: 30
+          periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
             port: 5000
-          initialDelaySeconds: 5
-          periodSeconds: 5
+          initialDelaySeconds: 150
+          periodSeconds: 30
         env:
         - name: PROJECT_ID
           value: "841506577075"
@@ -63,14 +70,14 @@ spec:
         image: expediagroup/mittens:latest
         resources:
           limits:
-            memory: 50Mi
-            cpu: 50m
+            memory: 32Mi
+            cpu: 5m
           requests:
-            memory: 50Mi
-            cpu: 50m
+            memory: 32Mi
+            cpu: 5m
         args:
         - "--concurrency=1"
-        - "--max-readiness-wait-seconds=60"
+        - "--max-readiness-wait-seconds=300"
         - "--max-warmup-seconds=30"
         - "--fail-readiness=true"
         - "--file-probe-enabled=false"

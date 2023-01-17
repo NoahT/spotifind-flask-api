@@ -45,6 +45,7 @@ steps:
   - --image=gcr.io/${PROJECT_ID}/spotifind
   - --location=${_CLOUDSDK_COMPUTE_ZONE}
   - --cluster=${_CLOUDSDK_CONTAINER_CLUSTER}
+  - --timeout=${_GKE_DEPLOY_TIMEOUT}
 images:
 - gcr.io/${PROJECT_ID}/spotifind
 - gcr.io/${PROJECT_ID}/spotifind-integration-test
