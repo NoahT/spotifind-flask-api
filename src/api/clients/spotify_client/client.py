@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from ..spotify_auth_client.client import SpotifyAuthClient
 from ..logging_client.client import LoggingClient
 from ...config.config_facade import ConfigFacade
+import json
 import requests
 
 class Client(ABC):
@@ -13,27 +14,32 @@ class Client(ABC):
     def v1_audio_features(self, id) -> dict:
         pass
 
+    @abstractmethod
+    def v1_create_playlist(self, user_id, user_token, name='Spotifind playlist', description='https://github.com/NoahT/spotifind-flask-api', is_public=True) -> dict:
+        pass
+
 class SpotifyClient(Client):
     def __init__(self, auth_client: SpotifyAuthClient, logging_client: LoggingClient, config_facade: ConfigFacade):
         self._hostname = 'https://api.spotify.com'
         self._v1_tracks_path = '/v1/tracks/'
         self._v1_audio_features_path = '/v1/audio-features/'
+        self._v1_create_playlist_path = '/v1/users/{}/playlists'
         self._auth_client = auth_client
-        self.logger = logging_client.get_logger(self.__class__.__name__)
+        self._logger = logging_client.get_logger(self.__class__.__name__)
         self._config_facade = config_facade
 
     def v1_tracks(self, id, **kwargs) -> dict:
-        batch = self.logger.batch()
+        batch = self._logger.batch()
 
-        batch.log('Making GET call to /v1/tracks', severity='INFO')
+        batch.log('Making GET call to {}'.format(self._v1_tracks_path), severity='INFO')
         batch.log('track_id={}'.format(id), severity='INFO')
-        endpoint = '{}{}{}'.format(self._hostname, self._v1_tracks_path, id)
+        url = '{}{}{}'.format(self._hostname, self._v1_tracks_path, id)
 
         marketplace = kwargs.get('marketplace')
 
         if marketplace:
             batch.log('marketplace={}'.format(marketplace), severity='INFO')
-            endpoint = '{}?market={}'.format(endpoint, marketplace)
+            url = '{}?market={}'.format(url, marketplace)
         else:
             batch.log('marketplace query param omitted.', severity='INFO')
 
@@ -43,7 +49,7 @@ class SpotifyClient(Client):
             'Authorization': bearer_token
         }
 
-        response = requests.get(endpoint, headers=headers, timeout=self.get_timeouts())
+        response = requests.get(url, headers=headers, timeout=self.get_timeouts())
         batch.log('status={}'.format(response.status_code), severity='NOTICE')
         response.raise_for_status()
         response_json = response.json()
@@ -53,11 +59,11 @@ class SpotifyClient(Client):
         return response_json
     
     def v1_audio_features(self, id) -> dict:
-        batch = self.logger.batch()
+        batch = self._logger.batch()
 
-        batch.log('Making GET call to /v1/audio-features', severity='INFO')
+        batch.log('Making GET call to {}'.format(self.v1_audio_features), severity='INFO')
         batch.log('track_id={}'.format(id), severity='INFO')
-        endpoint = '{}{}{}'.format(self._hostname, self._v1_audio_features_path, id)
+        url = '{}{}{}'.format(self._hostname, self._v1_audio_features_path, id)
 
         bearer_token = self.get_bearer_token()
 
@@ -65,7 +71,36 @@ class SpotifyClient(Client):
             'Authorization': bearer_token
         }
 
-        response = requests.get(endpoint, headers=headers, timeout=self.get_timeouts())
+        response = requests.get(url, headers=headers, timeout=self.get_timeouts())
+        batch.log('status={}'.format(response.status_code), severity='NOTICE')
+        response.raise_for_status()
+        response_json = response.json()
+        batch.log('response={}'.format(response_json), severity='INFO')
+        batch.commit()
+
+        return response_json
+    
+    def v1_create_playlist(self, user_id, user_token, name='Spotifind playlist', description='https://github.com/NoahT/spotifind-flask-api', is_public=True) -> dict:
+        batch = self._logger.batch()
+
+        batch.log('Making POST call to {}'.format(self._v1_create_playlist_path), severity='INFO')
+        batch.log('user_id={}'.format(user_id), severity='INFO')
+        
+        playlist_resource = self._v1_create_playlist_path.format(user_id)
+        url = '{}{}'.format(self._hostname, playlist_resource)
+        
+        payload = {
+            'name': name,
+            'description': description,
+            'public': is_public
+        }
+        batch.log('payload={}'.format(json.dumps(payload)))
+
+        headers = {
+            'Authorization': user_token
+        }
+
+        response = requests.post(url, headers=headers, timeout=self.get_timeouts(), json=json.loads(json.dumps(payload)))
         batch.log('status={}'.format(response.status_code), severity='NOTICE')
         response.raise_for_status()
         response_json = response.json()
