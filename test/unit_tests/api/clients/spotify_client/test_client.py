@@ -92,6 +92,27 @@ class SpotifyClientTestSuite(unittest.TestCase):
         requests.post = Mock(return_value=self._response)
 
         self.assertRaises(requests.HTTPError, self._spotify_client.v1_create_playlist, 'user_id', 'user_token')
+    
+    def test_should_return_json_for_2xx_response_on_v1_playlist_tracks(self):
+        self._response.status_code = 200
+        requests.post = Mock(return_value=self._response)
+        requests.Response.json = Mock(return_value={})
+
+        response = self._spotify_client.v1_playlist_tracks('playlist_id', ['uri1', 'uri2'], 'user_token')
+        
+        self.assertEqual({}, response)
+    
+    def test_should_raise_error_for_4xx_response_on_v1_playlist_tracks(self):
+        self._response.status_code = 400
+        requests.post = Mock(return_value=self._response)
+
+        self.assertRaises(requests.HTTPError, self._spotify_client.v1_playlist_tracks, 'playlist_id', ['uri1', 'uri2'], 'user_token')
+    
+    def test_should_raise_error_for_5xx_response_on_v1_playlist_tracks(self):
+        self._response.status_code = 500
+        requests.post = Mock(return_value=self._response)
+        
+        self.assertRaises(requests.HTTPError, self._spotify_client.v1_playlist_tracks, 'playlist_id', ['uri1', 'uri2'], 'user_token')
 
     def test_should_return_correct_authorization_header(self):
         auth_client = Mock()
