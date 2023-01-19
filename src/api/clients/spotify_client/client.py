@@ -120,7 +120,7 @@ class SpotifyClient(Client):
 
         playlist_resource = self._v1_playlist_tracks_path.format(playlist_id)
         url = '{}{}'.format(self._hostname, playlist_resource)
-        
+
         batch.log('Making POST call to {}'.format(playlist_resource), severity='INFO')
         batch.log('playlist_id={}'.format(playlist_id), severity='INFO')
 
@@ -133,7 +133,7 @@ class SpotifyClient(Client):
             'Authorization': user_token
         }
 
-        response = requests.post(url=url, json=payload, headers=headers)
+        response = requests.post(url=url, json=json.loads(json.dumps(payload)), headers=headers)
         batch.log('status={}'.format(response.status_code), severity='NOTICE')
         response.raise_for_status()
         response_json = response.json()
