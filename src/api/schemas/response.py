@@ -77,7 +77,7 @@ class ResponseBuilderFactory():
         self._internal_server_error_builder = internal_server_error_builder
         self._ok_builder = ok_builder
     
-    def get_builder(self, status_code) -> ResponseBuilder:
+    def get_builder(self, status_code: int) -> ResponseBuilder:
         builder = None
         if status_code == HTTPStatus.BAD_REQUEST.value:
             builder = self._bad_request_builder

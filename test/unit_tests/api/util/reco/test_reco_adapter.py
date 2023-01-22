@@ -1,9 +1,9 @@
 from http import HTTPStatus
 from requests import HTTPError as ClientHTTPError, Response
 from unittest.mock import patch, Mock
-from src.api.util.reco_adapter import V1RecoAdapter
-from src.api.schemas.response import BadRequestResponseBuilder, NotFoundResponseBuilder, OkResponseBuilder
-from src.api.clients.matching_engine_client.match_service_pb2 import MatchResponse
+import src.api.util.reco.reco_adapter as reco_adapter
+import src.api.schemas.response as response
+import src.api.clients.matching_engine_client.match_service_pb2 as match_service
 import unittest
 
 class V1RecoAdapterTestSuite(unittest.TestCase):
@@ -12,15 +12,15 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
     @patch('src.api.clients.logging_client.client.Client')
     @patch('src.api.clients.spotify_client.client.Client')
     def setUp(self, spotify_client, logging_client, client_aggregator, response_builder_factory) -> None:
-        bad_request_response_builder = Mock(BadRequestResponseBuilder)
+        bad_request_response_builder = Mock(response.BadRequestResponseBuilder)
         bad_request_response_builder.build_response.return_value = {
             'status': 400
         }
-        not_found_response_builder = Mock(NotFoundResponseBuilder)
+        not_found_response_builder = Mock(response.NotFoundResponseBuilder)
         not_found_response_builder.build_response.return_value = {
             'status': 404
         }
-        ok_response_builder = Mock(OkResponseBuilder)
+        ok_response_builder = Mock(response.OkResponseBuilder)
         ok_response_builder.build_response.return_value = {
             'status': 200
         }
@@ -42,7 +42,7 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
         
         response_builder_factory.get_builder.side_effect = response_builder_factory_side_effect
         
-        self.reco_adapter = V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
+        self.reco_adapter = reco_adapter.V1RecoAdapter(spotify_client=spotify_client, logging_client=logging_client, client_aggregator=client_aggregator, response_builder_factory=response_builder_factory)
     
     def test_should_return_recos_on_happy_path(self) -> None:
         self.reco_adapter.spotify_client.v1_audio_features.return_value = {
@@ -58,7 +58,7 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
             'valence': 10,
             'tempo': 11
         }
-        self.reco_adapter.match_service_client.get_match.return_value = MatchResponse()
+        self.reco_adapter.match_service_client.get_match.return_value = match_service.MatchResponse()
 
         response = self.reco_adapter.get_recos(id='id', size='5')
 

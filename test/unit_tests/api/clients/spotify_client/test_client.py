@@ -3,16 +3,7 @@ import unittest
 import src.api.clients.spotify_client.client as spotify_client
 import requests
 
-environment_variables = {
-    'PROJECT_ID': '841506577075',
-    'CLIENT_ID': '081f994d972f46519c1c8f9f6f11102a',
-    'SECRET_ID': 'spotify-rest-api-secret',
-    'SECRET_VERSION_ID': 'latest',
-    'PROJECT_NAME': 'spotifind-api'
-}
-
 class SpotifyClientTestSuite(unittest.TestCase):
-    @patch.dict('os.environ', environment_variables)
     def setUp(self) -> None:
         logging_client = Mock()
         auth_client = Mock()

@@ -1,5 +1,5 @@
 import json
-import os
+import src.api.util.env as env
 
 CONFIG_PATH = './config/'
 def load_config(config_env: str):
@@ -14,24 +14,27 @@ def load_config(config_env: str):
 
 class ConfigFacade():
     def __init__(self) -> None:
-        config_default = load_config('default')
-        config_environment = load_config(os.environ['ENVIRONMENT'])
-        # https://peps.python.org/pep-0448/
-        config = {**config_default, **config_environment}
-        
-        self.environment = config['ENVIRONMENT']
-        self.match_service_enabled = config['MATCH_SERVICE_ENABLED']
-        self.spotify_auth_client_config = config['SPOTIFY_AUTH_CLIENT_CONFIG']
-        self.spotify_client_config = config['SPOTIFY_CLIENT_CONFIG']
-    
+        self._config = None
+
     def get_environment(self) -> str:
-        return self.environment
+        return self.config['ENVIRONMENT']
     
     def is_match_service_enabled(self) -> bool:
-        return self.match_service_enabled or False
+        return self.config['MATCH_SERVICE_ENABLED'] or False
     
     def get_spotify_auth_client_config(self) -> bool:
-        return self.spotify_auth_client_config or {}
+        return self.config['SPOTIFY_AUTH_CLIENT_CONFIG'] or {}
     
     def get_spotify_client_config(self) -> bool:
-        return self.spotify_client_config or {}
+        return self.config['SPOTIFY_CLIENT_CONFIG'] or {}
+    
+    @property
+    def config(self) -> dict:
+        if not self._config:
+            config_default = load_config('default')
+            config_environment = load_config(env.env_util.get_environment_variable('ENVIRONMENT'))
+            # https://peps.python.org/pep-0448/
+            config = {**config_default, **config_environment}
+            self._config = config
+        
+        return self._config
