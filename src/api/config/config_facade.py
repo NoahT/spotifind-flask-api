@@ -1,7 +1,10 @@
 import json
 import src.api.util.env as env
 
-CONFIG_PATH = './'
+# Relative path: open(..) reads relative path based on current working
+# directory which is not based on this location in source code (it will be based
+# on path of execution for running process in Docker container)
+CONFIG_PATH = './src/api/config/'
 def load_config(config_env: str):
     config_file_path = '{}{}.json'.format(CONFIG_PATH, config_env)
     print('Config file: {}'.format(config_file_path))
