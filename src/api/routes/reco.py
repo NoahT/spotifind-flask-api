@@ -1,7 +1,7 @@
 import json
 import traceback
 import src.api.schemas as schemas
-import src.api.util as util
+import src.api.util.reco as reco_util
 from http import HTTPStatus
 from flask import Blueprint, request
 
@@ -13,7 +13,7 @@ def id(id):
     size = request.args.get(key='size') or str(5)
 
     try:
-        response = util.reco_adapter.get_recos(id=id, size=size)
+        response = reco_util.v1_reco_adapter.get_recos(id=id, size=size)
     except Exception:
         print(traceback.format_exc())
         response = schemas.response_builder_factory.get_builder(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(recos_response=None, id=id, size=size)
