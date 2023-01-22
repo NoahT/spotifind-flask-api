@@ -1,7 +1,7 @@
 import json
 import src.api.util.env as env
 
-CONFIG_PATH = './config/'
+CONFIG_PATH = './'
 def load_config(config_env: str):
     config_file_path = '{}{}.json'.format(CONFIG_PATH, config_env)
     print('Config file: {}'.format(config_file_path))
