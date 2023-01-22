@@ -1,4 +1,5 @@
 import json
+import traceback
 import src.api.schemas as schemas
 import src.api.util as util
 from http import HTTPStatus
@@ -14,6 +15,7 @@ def id(id):
     try:
         response = util.reco_adapter.get_recos(id=id, size=size)
     except Exception:
+        print(traceback.format_exc())
         response = schemas.response_builder_factory.get_builder(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(recos_response=None, id=id, size=size)
     finally:
         print(json.dumps(response.response))
