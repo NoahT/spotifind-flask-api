@@ -1,6 +1,6 @@
 import json
 import unittest
-from unittest.mock import mock_open, patch
+from unittest.mock import mock_open, patch, Mock
 from src.api.config.config_facade import ConfigFacade
 
 config = {
@@ -16,27 +16,39 @@ config = {
     }
 }
 
+def env_util_side_effect(*args, **kwargs):
+    return 'development'
 
 class ConfigFacadeTestSuite(unittest.TestCase):
-    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps(config))
-    @patch('os.environ', { 'ENVIRONMENT': 'development' })
-    def setUp(self, mock_file) -> None:
+    def setUp(self) -> None:
         self.config_facade = ConfigFacade()
     
-    def test_should_return_environment_when_in_config(self) -> None:
+    @patch('src.api.util.env.env_util')
+    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps(config))
+    def test_should_return_environment_when_in_config(self, mock_file, env_util) -> None:
+        env_util.get_environment_variable.side_effect = env_util_side_effect
         self.assertEqual('development', self.config_facade.get_environment())
-
-    def test_should_return_if_match_service_client_enabled(self) -> None:
+    
+    @patch('src.api.util.env.env_util')
+    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps(config))
+    def test_should_return_if_match_service_client_enabled(self, mock_file, env_util) -> None:
+        env_util.get_environment_variable.side_effect = env_util_side_effect
         self.assertFalse(self.config_facade.is_match_service_enabled())
-
-    def test_should_return_spotify_auth_client_config(self) -> None:
+    
+    @patch('src.api.util.env.env_util')
+    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps(config))
+    def test_should_return_spotify_auth_client_config(self, mock_file, env_util) -> None:
+        env_util.get_environment_variable.side_effect = env_util_side_effect
         spotify_auth_client_config = self.config_facade.get_spotify_auth_client_config()
 
         self.assertIsNotNone(spotify_auth_client_config)
         self.assertEqual(0.500, spotify_auth_client_config["CONNECT_TIMEOUT"])
         self.assertEqual(1.000, spotify_auth_client_config["READ_TIMEOUT"])
 
-    def test_should_return_spotify_auth_client_config(self) -> None:
+    @patch('src.api.util.env.env_util')
+    @patch('builtins.open', new_callable=mock_open, read_data=json.dumps(config))
+    def test_should_return_spotify_auth_client_config(self, mock_file, env_util) -> None:
+        env_util.get_environment_variable.side_effect = env_util_side_effect
         spotify_client_config = self.config_facade.get_spotify_client_config()
 
         self.assertIsNotNone(spotify_client_config)

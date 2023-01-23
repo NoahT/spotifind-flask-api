@@ -25,7 +25,7 @@ class MockMatchServiceClient(Client):
 
         return response
 
-    def get_neighbor(self, id: str, distance) -> object:
+    def get_neighbor(self, id: str, distance: float) -> object:
         neighbor = match_service_pb2.MatchResponse.Neighbor()
         neighbor.id = id
         neighbor.distance = distance

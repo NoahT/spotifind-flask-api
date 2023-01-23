@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from ..spotify_auth_client.client import SpotifyAuthClient
-from ..logging_client.client import LoggingClient
-from ...config.config_facade import ConfigFacade
+from google.cloud import logging_v2
+import src.api.clients.spotify_auth_client.client as spotify_auth_client
+import src.api.clients.logging_client as logging_client
+import src.api.config.config_facade as config_facade
 import json
 import requests
 
@@ -23,18 +24,19 @@ class Client(ABC):
         pass
 
 class SpotifyClient(Client):
-    def __init__(self, auth_client: SpotifyAuthClient, logging_client: LoggingClient, config_facade: ConfigFacade):
+    def __init__(self, auth_client: spotify_auth_client.SpotifyAuthClient, logging_client: logging_client.LoggingClient, config_facade: config_facade.ConfigFacade):
         self._hostname = 'https://api.spotify.com'
         self._v1_tracks_path = '/v1/tracks/'
         self._v1_audio_features_path = '/v1/audio-features/'
         self._v1_create_playlist_path = '/v1/users/{}/playlists'
         self._v1_playlist_tracks_path = '/v1/playlists/{}/tracks'
         self._auth_client = auth_client
-        self._logger = logging_client.get_logger(self.__class__.__name__)
+        self._logging_client = logging_client
+        self._logger = None
         self._config_facade = config_facade
 
     def v1_tracks(self, id, **kwargs) -> dict:
-        batch = self._logger.batch()
+        batch = self.logger.batch()
 
         batch.log('Making GET call to {}'.format(self._v1_tracks_path), severity='INFO')
         batch.log('track_id={}'.format(id), severity='INFO')
@@ -64,7 +66,7 @@ class SpotifyClient(Client):
         return response_json
     
     def v1_audio_features(self, id) -> dict:
-        batch = self._logger.batch()
+        batch = self.logger.batch()
 
         batch.log('Making GET call to {}'.format(self.v1_audio_features), severity='INFO')
         batch.log('track_id={}'.format(id), severity='INFO')
@@ -86,7 +88,7 @@ class SpotifyClient(Client):
         return response_json
     
     def v1_create_playlist(self, user_id, user_token, name='Spotifind playlist', description='https://github.com/NoahT/spotifind-flask-api', is_public=True) -> dict:
-        batch = self._logger.batch()
+        batch = self.logger.batch()
 
         playlist_resource = self._v1_create_playlist_path.format(user_id)
         url = '{}{}'.format(self._hostname, playlist_resource)
@@ -116,7 +118,7 @@ class SpotifyClient(Client):
         return response_json
     
     def v1_playlist_tracks(self, playlist_id, uris, user_token) -> dict:
-        batch = self._logger.batch()
+        batch = self.logger.batch()
 
         playlist_resource = self._v1_playlist_tracks_path.format(playlist_id)
         url = '{}{}'.format(self._hostname, playlist_resource)
@@ -156,3 +158,10 @@ class SpotifyClient(Client):
         bearer_token = 'Bearer {}'.format(bearer_token)
         
         return bearer_token
+    
+    @property
+    def logger(self) -> logging_v2.Logger:
+        if not self._logger:
+            self._logger = self._logging_client.get_logger(self.__class__.__name__)
+        
+        return self._logger

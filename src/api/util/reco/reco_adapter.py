@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from http import HTTPStatus
 from urllib.error import HTTPError
 from requests import HTTPError as ClientHTTPError
-from ..clients.spotify_client.client import Client as SpotifyClient
-from ..clients.logging_client.client import Client as LoggingClient
-from ..clients.matching_engine_client.client_aggregator import ClientAggregator
-from ..schemas.response import ResponseBuilderFactory, Response
+import src.api.clients.spotify_client.client as spotify_client
+import src.api.clients.logging_client.client as logging_client
+import src.api.clients.matching_engine_client.client_aggregator as client_aggregator
+import src.api.schemas.response as response
 from google.protobuf.json_format import MessageToDict
 
 class RecoAdapter(ABC):
@@ -14,14 +14,15 @@ class RecoAdapter(ABC):
         pass
 
 class V1RecoAdapter(RecoAdapter):
-    def __init__(self, spotify_client: SpotifyClient, logging_client: LoggingClient, client_aggregator: ClientAggregator, response_builder_factory: ResponseBuilderFactory) -> None:
+    def __init__(self, spotify_client: spotify_client.SpotifyClient, logging_client: logging_client.LoggingClient, client_aggregator: client_aggregator.ClientAggregator, response_builder_factory: response.ResponseBuilderFactory) -> None:
         self.spotify_client = spotify_client
-        self.match_service_client = client_aggregator.get_client()
+        self.client_aggregator = client_aggregator
+        self._match_service_client = None
         self.response_builder_factory = response_builder_factory
         # This is the feature space we chose for /v1/reco API. Note that these are the same features in Spotify /v1/audio-features API response
         self.feature_mapping = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
     
-    def get_recos(self, id: str, size: str) -> Response:
+    def get_recos(self, id: str, size: str) -> response.Response:
         recos_response = None
         recos_dict = None
         try:
@@ -52,3 +53,10 @@ class V1RecoAdapter(RecoAdapter):
             embedding.append(feature_value)
         
         return embedding
+    
+    @property
+    def match_service_client(self):
+        if not self._match_service_client:
+            self._match_service_client = self.client_aggregator.get_client()
+        
+        return self._match_service_client

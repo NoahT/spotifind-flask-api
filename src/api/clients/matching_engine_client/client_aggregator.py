@@ -1,8 +1,8 @@
 from . import client
-from ...config.config_facade import ConfigFacade
+import src.api.config.config_facade as config_facade
 
 class ClientAggregator():
-    def __init__(self, config_facade: ConfigFacade, mock_match_service_client: client.Client, match_service_client: client.Client) -> None:
+    def __init__(self, config_facade: config_facade.ConfigFacade, mock_match_service_client: client.Client, match_service_client: client.Client) -> None:
         self.config_facade = config_facade
         self.mock_match_service_client = mock_match_service_client
         self.match_service_client = match_service_client

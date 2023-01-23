@@ -1,22 +1,21 @@
-from unittest.mock import Mock, patch
 import unittest
 import requests
 import src.api.clients.spotify_auth_client.client as spotify_auth_client
-
-environment_variables = {
-    'PROJECT_ID': '841506577075',
-    'CLIENT_ID': '081f994d972f46519c1c8f9f6f11102a',
-    'SECRET_ID': 'spotify-rest-api-secret',
-    'SECRET_VERSION_ID': 'latest',
-    'PROJECT_NAME': 'spotifind-api'
-}
+from unittest.mock import Mock, patch
 
 class SpotifyAuthClientTestSuite(unittest.TestCase):
-    @patch.dict('os.environ', environment_variables)
-    def setUp(self) -> None:
+    @patch('src.api.util.env.environment_variable_proxy.EnvironmentVariableProxy')
+    def setUp(self, environment_variable_proxy) -> None:
+        environment_variable_proxy.get_environment_variable.side_effect = lambda key: {
+            'PROJECT_ID': '841506577075',
+            'CLIENT_ID': '081f994d972f46519c1c8f9f6f11102a',
+            'SECRET_ID': 'spotify-rest-api-secret',
+            'SECRET_VERSION_ID': 'latest',
+            'PROJECT_NAME': 'spotifind-api'
+        }[key]
         logging_client = Mock()
         logging_client.get_logger.return_value = Mock()
-        
+
         config_facade = Mock()
         config_facade.get_spotify_auth_client_config.return_value = {
             'CONNECT_TIMEOUT': 0.500,

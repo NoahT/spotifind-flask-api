@@ -1,17 +1,27 @@
 from abc import ABC, abstractmethod
 from google.cloud import logging_v2
-import os
+import src.api.util.env as env
 
 class Client(ABC):
     @abstractmethod
-    def get_logger(self, name) -> logging_v2.Logger:
+    def get_logger(self, name: str) -> logging_v2.Logger:
         pass
 
 class LoggingClient(Client):
     def __init__(self) -> None:
-        project_name = os.environ['PROJECT_NAME']
-        self.client = logging_v2.Client(project=project_name)
+        self._client = None
 
-    def get_logger(self, name) -> logging_v2.Logger:
+    def get_logger(self, name: str) -> logging_v2.Logger:
         logger = self.client.logger(name=name)
         return logger
+    
+    @property
+    def project_name(self) -> str:
+        return env.env_util.get_environment_variable('PROJECT_NAME')
+    
+    @property
+    def client(self) -> logging_v2.Client:
+        if not self._client:
+            self._client = logging_v2.Client(project=self.project_name)
+        
+        return self._client

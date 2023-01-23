@@ -3,12 +3,11 @@ from google.cloud import secretmanager
 from cachetools import cached
 from cachetools import TTLCache
 import google_crc32c
-import os
 import requests
 import base64
-
-from ..logging_client.client import LoggingClient
-from ...config.config_facade import ConfigFacade
+import src.api.util.env as env
+import src.api.clients.logging_client.client as logging_client
+import src.api.config.config_facade as config_facade
 
 class Client(ABC):
     @abstractmethod
@@ -16,15 +15,14 @@ class Client(ABC):
         pass
 
 class SpotifyAuthClient(Client):
-    def __init__(self, logging_client: LoggingClient, config_facade: ConfigFacade):
+    def __init__(self, logging_client: logging_client.LoggingClient, config_facade: config_facade.ConfigFacade):
         self._hostname = 'https://accounts.spotify.com'
         self._api_token_path = '/api/token'
-        self._project_id = os.environ['PROJECT_ID']
-        self._client_id = os.environ['CLIENT_ID']
-        self._secret_id = os.environ['SECRET_ID']
-        self._secret_version_id = os.environ['SECRET_VERSION_ID']
-        self._logger = logging_client.get_logger(self.__class__.__name__)
         self._config_facade = config_facade
+        self._project_id = None
+        self._client_id = None
+        self._secret_id = None
+        self._secret_version_id = None
 
     def get_bearer_token(self) -> dict:
         token = self.get_bearer_token_from_cache(key='public')
@@ -58,7 +56,7 @@ class SpotifyAuthClient(Client):
 
     def get_basic_token(self) -> str:
         secret = self.access_secret_version()
-        credentials = '{}:{}'.format(self._client_id, secret)
+        credentials = '{}:{}'.format(self.client_id, secret)
         credentials = credentials.encode('utf-8')
         basic_token = base64.b64encode(credentials)
         basic_token = str(basic_token, 'utf-8')
@@ -72,7 +70,7 @@ class SpotifyAuthClient(Client):
 
         return form_urlencoded
     
-    def get_headers(self, basic_auth) -> dict:
+    def get_headers(self, basic_auth: str) -> dict:
         headers =  {
             'Authorization': basic_auth,
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -82,16 +80,44 @@ class SpotifyAuthClient(Client):
     
     def access_secret_version(self):
         client = secretmanager.SecretManagerServiceClient()
-        name = client.secret_version_path(self._project_id, self._secret_id, self._secret_version_id)
+        name = client.secret_version_path(self.project_id, self.secret_id, self.secret_version_id)
 
         response = client.access_secret_version(request={'name': name})
 
         crc32c = google_crc32c.Checksum()
         crc32c.update(response.payload.data)
         if response.payload.data_crc32c != int(crc32c.hexdigest(), 16):
-            self._logger.log('Data corruption detected.', severity='WARNING')
+            self.logger.log('Data corruption detected.', severity='WARNING')
             return response
 
         payload = response.payload.data.decode('UTF-8')
 
         return payload
+    
+    @property
+    def project_id(self) -> str:
+        if not self._project_id:
+            self._project_id = env.env_util.get_environment_variable('PROJECT_ID')
+        
+        return self._project_id
+    
+    @property
+    def client_id(self) -> str:
+        if not self._client_id:
+            self._client_id = env.env_util.get_environment_variable('CLIENT_ID')
+        
+        return self._client_id
+    
+    @property
+    def secret_id(self) -> str:
+        if not self._secret_id:
+            self._secret_id = env.env_util.get_environment_variable('SECRET_ID')
+        
+        return self._secret_id
+    
+    @property
+    def secret_version_id(self) -> str:
+        if not self._secret_version_id:
+            self._secret_version_id = env.env_util.get_environment_variable('SECRET_VERSION_ID')
+        
+        return self._secret_version_id
