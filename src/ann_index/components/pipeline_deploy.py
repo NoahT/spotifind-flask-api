@@ -51,7 +51,7 @@ def get_ann_index(filter):
 
 def deploy_index(index, index_endpoint):
     deployed_index_id = 'spotifind_ann_index_deployed_{}_{}_{}'.format(VERSION, ENVIRONMENT, int(time.time()))
-    MatchingEngineIndexEndpoint.deploy_index(
+    index_endpoint.deploy_index(
         index=index,
         deployed_index_id=deployed_index_id,
         machine_type=MACHINE_TYPE,
