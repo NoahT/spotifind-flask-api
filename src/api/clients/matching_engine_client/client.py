@@ -44,7 +44,7 @@ class MatchServiceClient(Client):
         
         match_neighbors = self._index_endpoint.match(
             deployed_index_id=self._deployed_index_id,
-            queries=list(query),
+            queries=[query],
             num_neighbors=num_recos
         )
         
