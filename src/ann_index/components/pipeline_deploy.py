@@ -25,6 +25,7 @@ MAX_REPLICA = args.max_replica
 
 location = 'projects/{}/locations/{}'.format(PROJECT_NUMBER, REGION)
 aiplatform_endpoint = '{}-aiplatform.googleapis.com'.format(REGION)
+TIMEOUT_THRESHOLD = 60 # Timeout threshold before job failure
 
 def get_ann_index_endpoint(filter):
     index_endpoints = MatchingEngineIndexEndpoint.list(
@@ -61,19 +62,23 @@ def deploy_index(index, index_endpoint):
     )
 
     index_endpoint = None
+    delta = 0
     while True:
         index_endpoint = get_ann_index_endpoint('deployedIndexes.id={}'.format(deployed_index_id))
         if index_endpoint:
             break
+        
+        if delta >= TIMEOUT_THRESHOLD:
+            raise TimeoutError()
+        
+        delta += 1
         time.sleep(60)
-    
-    return deploy_index
 
 
 spotifind_index = get_ann_index('labels.environment={} AND labels.version={}'.format(ENVIRONMENT, VERSION))
 spotifind_index_endpoint = get_ann_index_endpoint('labels.environment={} AND labels.region={}'.format(ENVIRONMENT, REGION))
 
-deployed_indexes = spotifind_index.deployed_indexes
+deployed_indexes = spotifind_index_endpoint.deployed_indexes
 
 if not deployed_indexes:
-    deployed_index = deploy_index(spotifind_index, spotifind_index_endpoint)
+    deploy_index(spotifind_index, spotifind_index_endpoint)
