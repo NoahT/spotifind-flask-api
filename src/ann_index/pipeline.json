@@ -5,13 +5,28 @@
         "executorLabel": "exec-spotifind-ann-index-deployment",
         "inputDefinitions": {
           "parameters": {
+            "environment": {
+              "type": "STRING"
+            },
+            "machine_type": {
+              "type": "STRING"
+            },
+            "max_replica": {
+              "type": "INT"
+            },
+            "min_replica": {
+              "type": "INT"
+            },
             "peering_range": {
               "type": "STRING"
             },
-            "project_id": {
+            "project_number": {
               "type": "STRING"
             },
             "region": {
+              "type": "STRING"
+            },
+            "version": {
               "type": "STRING"
             }
           }
@@ -29,8 +44,18 @@
               "{{$.inputs.parameters['peering_range']}}",
               "--region",
               "{{$.inputs.parameters['region']}}",
-              "--project-id",
-              "{{$.inputs.parameters['project_id']}}"
+              "--project-number",
+              "{{$.inputs.parameters['project_number']}}",
+              "--environment",
+              "{{$.inputs.parameters['environment']}}",
+              "--version",
+              "{{$.inputs.parameters['version']}}",
+              "--machine-type",
+              "{{$.inputs.parameters['machine_type']}}",
+              "--min-replica",
+              "{{$.inputs.parameters['min_replica']}}",
+              "--max-replica",
+              "{{$.inputs.parameters['max_replica']}}"
             ],
             "image": "gcr.io/spotifind-api/ann_index_deployment:latest"
           }
@@ -50,14 +75,29 @@
             },
             "inputs": {
               "parameters": {
+                "environment": {
+                  "componentInputParameter": "environment"
+                },
+                "machine_type": {
+                  "componentInputParameter": "machine_type"
+                },
+                "max_replica": {
+                  "componentInputParameter": "max_replica"
+                },
+                "min_replica": {
+                  "componentInputParameter": "min_replica"
+                },
                 "peering_range": {
                   "componentInputParameter": "peering_range"
                 },
-                "project_id": {
-                  "componentInputParameter": "project_id"
+                "project_number": {
+                  "componentInputParameter": "project_number"
                 },
                 "region": {
                   "componentInputParameter": "region"
+                },
+                "version": {
+                  "componentInputParameter": "version"
                 }
               }
             },
@@ -69,13 +109,28 @@
       },
       "inputDefinitions": {
         "parameters": {
+          "environment": {
+            "type": "STRING"
+          },
+          "machine_type": {
+            "type": "STRING"
+          },
+          "max_replica": {
+            "type": "INT"
+          },
+          "min_replica": {
+            "type": "INT"
+          },
           "peering_range": {
             "type": "STRING"
           },
-          "project_id": {
+          "project_number": {
             "type": "STRING"
           },
           "region": {
+            "type": "STRING"
+          },
+          "version": {
             "type": "STRING"
           }
         }

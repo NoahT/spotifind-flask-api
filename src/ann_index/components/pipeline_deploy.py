@@ -1,62 +1,79 @@
 import argparse
 import time
-from google.cloud import aiplatform_v1
+from google.cloud.aiplatform.matching_engine import MatchingEngineIndex, MatchingEngineIndexEndpoint
 
 parser = argparse.ArgumentParser(description='Deploy Vertex AI ANN index')
 parser.add_argument('--peering-range', type=str, help='VPC peering range for ANN index deployment')
 parser.add_argument('--region', type=str, help='Region containing ANN index endpoint deployment')
-parser.add_argument('--project-id', type=str, help='The GCP project ID')
+parser.add_argument('--project-number', type=str, help='The GCP project number')
+parser.add_argument('--environment', type=str, help='The target environment for deployment (dev, staging, etc.)')
+parser.add_argument('--version', type=str, help='Semantic versioning for the index being deployed')
+# https://cloud.google.com/vertex-ai/pricing#matchingengine
+parser.add_argument('--machine_type', type=str, help='Machine type for deployment (e2-standard-2, e2-standard-16, e2-highmem-16, etc.)')
+parser.add_argument('--min-replica', type=int, help='Minimum replica count for deployment')
+parser.add_argument('--max-replica', type=int, help='Maximum replica count for deployment')
 args = parser.parse_args()
 
 PEERING_RANGE_NAME = args.peering_range
 REGION = args.region
-PROJECT_ID = args.project_id
+PROJECT_NUMBER = args.project_number
+ENVIRONMENT = args.environment
+VERSION = args.version
+MACHINE_TYPE = args.machine_type
+MIN_REPLICA = args.min_replica
+MAX_REPLICA = args.max_replica
 
-location = "projects/{}/locations/{}".format(PROJECT_ID, REGION)
-aiplatform_endpoint = "{}-aiplatform.googleapis.com".format(REGION)
+location = 'projects/{}/locations/{}'.format(PROJECT_NUMBER, REGION)
+aiplatform_endpoint = '{}-aiplatform.googleapis.com'.format(REGION)
 
-index_endpoint_service_client = aiplatform_v1.IndexEndpointServiceClient(client_options=dict(api_endpoint=aiplatform_endpoint))
-index_service_client = aiplatform_v1.IndexServiceClient(client_options=dict(api_endpoint=aiplatform_endpoint))
-
-
-def get_ann_index_endpoint():
-    list_index_endpoints_request = aiplatform_v1.ListIndexEndpointsRequest(parent=location)
-    pager_result = index_endpoint_service_client.list_index_endpoints(request=list_index_endpoints_request)
-
-    index_endpoint = pager_result.index_endpoints[0]
-    return index_endpoint
-
-def get_ann_index():
-    list_indexes_request = aiplatform_v1.ListIndexesRequest(parent=location)
-    indexes_pager_result = index_service_client.list_indexes(request=list_indexes_request)
+def get_ann_index_endpoint(filter):
+    index_endpoints = MatchingEngineIndexEndpoint.list(
+        filter=filter,
+        project=PROJECT_NUMBER,
+        location=REGION
+    )
+    if len(index_endpoints) == 0:
+        return None
     
-    index = indexes_pager_result.indexes[0]
-    return index
+    return index_endpoints[0]
+
+def get_ann_index(filter):
+    indexes = MatchingEngineIndex.list(
+        filter=filter,
+        project=PROJECT_NUMBER,
+        location=REGION
+    )
+    if len(indexes) == 0:
+        return None
+
+    return indexes[0]
 
 def deploy_index(index, index_endpoint):
-    deployed_index = aiplatform_v1.DeployedIndex({
-        "id": "{}_deployed".format(index.display_name),
-        "index": index.name,
-        "display_name": "{}_deployed".format(index.display_name),
-        "reserved_ip_ranges": [
-            PEERING_RANGE_NAME
-        ]
-    })
-    
-    deployed_index_request = aiplatform_v1.DeployIndexRequest(index_endpoint=index_endpoint.name, deployed_index=deployed_index)
-    
-    deployed_index = index_endpoint_service_client.deploy_index(request=deployed_index_request)
+    deployed_index_id = 'spotifind_ann_index_deployed_{}_{}_{}'.format(VERSION, ENVIRONMENT, int(time.time()))
+    MatchingEngineIndexEndpoint.deploy_index(
+        index=index,
+        deployed_index_id=deployed_index_id,
+        machine_type=MACHINE_TYPE,
+        min_replica_count=MIN_REPLICA,
+        max_replica_count=MAX_REPLICA,
+        reserved_ip_ranges=[PEERING_RANGE_NAME],
+        deployment_group=ENVIRONMENT
+    )
 
+    deployed_index = index_endpoint.deployed_indexes[0]
+    
+    index_endpoint = None
     while True:
-        if deployed_index.done():
+        index_endpoint = get_ann_index_endpoint('deployedIndexes.id={}'.format(deployed_index_id))
+        if index_endpoint:
             break
         time.sleep(60)
     
     return deploy_index
 
 
-spotifind_index = get_ann_index()
-spotifind_index_endpoint = get_ann_index_endpoint()
+spotifind_index = get_ann_index('labels.environment={} AND labels.version={}'.format(ENVIRONMENT, VERSION))
+spotifind_index_endpoint = get_ann_index_endpoint('labels.environment={} AND labels.region={}'.format(ENVIRONMENT, REGION))
 
 deployed_indexes = spotifind_index.deployed_indexes
 
