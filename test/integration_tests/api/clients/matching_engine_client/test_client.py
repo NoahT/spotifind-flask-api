@@ -25,7 +25,7 @@ class MatchingEngineClientTestSuite(unittest.TestCase):
         }
         match_response = self.match_service_client.get_match(match_request=match_request)
         self.assertIsNotNone(match_response)
-        self.assertEqual(len(match_response), 1)
+        self.assertEqual(len(match_response[0]), 1)
 
     def test_should_return_match_response_for_multiple_reco(self) -> None:
         match_request = {
@@ -45,4 +45,4 @@ class MatchingEngineClientTestSuite(unittest.TestCase):
         }
         match_response = self.match_service_client.get_match(match_request=match_request)
         self.assertIsNotNone(match_response)
-        self.assertEqual(len(match_response), 5)
+        self.assertEqual(len(match_response[0]), 5)
