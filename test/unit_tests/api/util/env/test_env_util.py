@@ -11,3 +11,8 @@ class EnvironmentUtilTestSuite(unittest.TestCase):
         environment = self.env_util.get_environment_variable('ENVIRONMENT')
 
         self.assertEqual('development', environment)
+    
+    def test_should_properly_return_default_when_value_not_set(self) -> None:
+        environment = self.env_util.get_environment_variable('ENVIRONMENT', default='development')
+
+        self.assertEqual('development', environment)
