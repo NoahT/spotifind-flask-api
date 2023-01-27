@@ -6,7 +6,6 @@ import src.api.clients.spotify_client.client as spotify_client
 import src.api.clients.logging_client.client as logging_client
 import src.api.clients.matching_engine_client.client_aggregator as client_aggregator
 import src.api.schemas.response as response
-from google.protobuf.json_format import MessageToDict
 
 class RecoAdapter(ABC):
     @abstractmethod
@@ -20,7 +19,7 @@ class V1RecoAdapter(RecoAdapter):
         self._match_service_client = None
         self.response_builder_factory = response_builder_factory
         # This is the feature space we chose for /v1/reco API. Note that these are the same features in Spotify /v1/audio-features API response
-        self.feature_mapping = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo']
+        self.feature_mapping = ['danceability', 'energy', 'key', 'loudness', 'mode', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence']
     
     def get_recos(self, id: str, size: str) -> response.Response:
         recos_response = None
@@ -35,8 +34,7 @@ class V1RecoAdapter(RecoAdapter):
             audio_features = self.spotify_client.v1_audio_features(id=id)
             track_embedding = self.get_embedding(audio_features=audio_features)
             recos = self.match_service_client.get_match(match_request={'query': track_embedding, 'num_recos': (size_int + 1)})
-            recos_dict = MessageToDict(recos, including_default_value_fields=True, preserving_proto_field_name=False)
-            recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_response=recos_dict, id=id, size=int(size))
+            recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_response=recos, id=id, size=int(size))
         except HTTPError as http_error:
             print(http_error.__str__())
             recos_response = self.response_builder_factory.get_builder(status_code=http_error.code).build_response(recos_response=recos_dict, id=id, size=size)

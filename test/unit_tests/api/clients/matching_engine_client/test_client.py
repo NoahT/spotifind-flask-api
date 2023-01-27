@@ -9,32 +9,31 @@ class MockMatchServiceClientTestSuite(unittest.TestCase):
 
     def test_should_return_response_on_happy_path_for_mock_match_service(self) -> None:
         response = self.mock_match_service_client.get_match(None)
-        
         self.assertIsNotNone(response)
+        self.assertEqual(3, len(response))
 
-        neighbors = response.neighbor
-        self.assertEqual(3, len(neighbors))
-
-        neighbor0 = neighbors[0]
+        neighbor0 = response[0]
         self.assertIsNotNone(neighbor0)
         self.assertIsNotNone(neighbor0.id)
         self.assertIsNotNone(neighbor0.distance)
 
-        neighbor1 = neighbors[1]
+        neighbor1 = response[1]
         self.assertIsNotNone(neighbor1)
         self.assertIsNotNone(neighbor1.id)
         self.assertIsNotNone(neighbor1.distance)
 
-        neighbor2 = neighbors[2]
+        neighbor2 = response[2]
         self.assertIsNotNone(neighbor2)
         self.assertIsNotNone(neighbor2.id)
         self.assertIsNotNone(neighbor2.distance)
 
 class MatchServiceClientTestSuite(unittest.TestCase):
-    @patch('google.cloud.aiplatform_v1.services.index_endpoint_service.client.IndexEndpointServiceClient')
-    @patch('grpc.insecure_channel')
-    def setUp(self, channel, index_endpoint_service_client) -> None:
-        self.match_service_client = client.MatchServiceClient(location='us-west1', index_endpoint_service_client=index_endpoint_service_client)
+    @patch('src.api.util.env.env_util')
+    @patch('src.api.config.config_facade')
+    @patch('google.cloud.aiplatform.MatchingEngineIndexEndpoint')
+    def setUp(self, matching_engine_index_endpoint, config_facade, env_util) -> None:
+        env_util.get_environment_variable.return_value = 'mock_env'
+        self.match_service_client = client.MatchServiceClient(config_facade)
         self.match_service_client.DEPLOYED_INDEX_ID = ''
 
     def test_should_raise_error_on_invalid_query_for_match_service(self) -> None:

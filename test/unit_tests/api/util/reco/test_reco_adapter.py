@@ -1,9 +1,9 @@
 from http import HTTPStatus
+from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import MatchNeighbor
 from requests import HTTPError as ClientHTTPError, Response
 from unittest.mock import patch, Mock
 import src.api.util.reco.reco_adapter as reco_adapter
 import src.api.schemas.response as response
-import src.api.clients.matching_engine_client.match_service_pb2 as match_service
 import unittest
 
 class V1RecoAdapterTestSuite(unittest.TestCase):
@@ -58,7 +58,11 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
             'valence': 10,
             'tempo': 11
         }
-        self.reco_adapter.match_service_client.get_match.return_value = match_service.MatchResponse()
+        self.reco_adapter.match_service_client.get_match.return_value = [
+            MatchNeighbor('7C48cUjCGx14K5b41e9vTD', 1.0),
+            MatchNeighbor('3x7gMvCsL1SS6THGwB55Pm', 2.0),
+            MatchNeighbor('7sLQGgXFs4LaGAaDErPwOl', 5.0)
+        ]
 
         response = self.reco_adapter.get_recos(id='id', size='5')
 
@@ -101,7 +105,7 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
         }
         embedding = self.reco_adapter.get_embedding(audio_features=audio_features)
 
-        self.assertEqual(embedding, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        self.assertEqual(embedding, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 
     def test_should_raise_error_when_v1_track_embedding_cannot_be_created(self) -> None:
         audio_features = {
@@ -114,7 +118,6 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
             'acousticness': 7,
             'instrumentalness': 8,
             'liveness': 9,
-            'valence': 10,
         }
         
         self.assertRaises(KeyError, self.reco_adapter.get_embedding, audio_features)

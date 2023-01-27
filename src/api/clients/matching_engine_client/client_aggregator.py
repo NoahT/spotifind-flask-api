@@ -13,7 +13,7 @@ class ClientAggregator():
             if self.config_facade.is_match_service_enabled():
                 # If we decide to play around with multi-region deployments,
                 # this needs to be refactored
-                self.client = self.match_service_client()
+                self.client = self.match_service_client(self.config_facade)
             else:
                 self.client = self.mock_match_service_client()
             
