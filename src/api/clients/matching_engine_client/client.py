@@ -27,7 +27,7 @@ class MockMatchServiceClient(Client):
 
 class MatchServiceClient(Client):
     def __init__(self, config_facade: config_facade.ConfigFacade) -> None:
-        self._region = env.env_util.get_environment_variable('REGION') or REGION_DEFAULT
+        self._region = env.env_util.get_environment_variable('REGION', default=REGION_DEFAULT)
         self._environment = env.env_util.get_environment_variable('ENVIRONMENT')
         self._project_id = env.env_util.get_environment_variable('PROJECT_ID')
         self._location = LOCATION_URI.format(self._project_id, self._region)
