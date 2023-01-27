@@ -9,7 +9,7 @@ parser.add_argument('--project-number', type=str, help='The GCP project number')
 parser.add_argument('--environment', type=str, help='The target environment for deployment (dev, staging, etc.)')
 parser.add_argument('--version', type=str, help='Semantic versioning for the index being deployed')
 # https://cloud.google.com/vertex-ai/pricing#matchingengine
-parser.add_argument('--machine_type', type=str, help='Machine type for deployment (e2-standard-2, e2-standard-16, e2-highmem-16, etc.)')
+parser.add_argument('--machine-type', type=str, help='Machine type for deployment (e2-standard-2, e2-standard-16, e2-highmem-16, etc.)')
 parser.add_argument('--min-replica', type=int, help='Minimum replica count for deployment')
 parser.add_argument('--max-replica', type=int, help='Maximum replica count for deployment')
 args = parser.parse_args()
@@ -60,8 +60,6 @@ def deploy_index(index, index_endpoint):
         deployment_group=ENVIRONMENT
     )
 
-    deployed_index = index_endpoint.deployed_indexes[0]
-    
     index_endpoint = None
     while True:
         index_endpoint = get_ann_index_endpoint('deployedIndexes.id={}'.format(deployed_index_id))
