@@ -25,15 +25,12 @@ class V1RecoAdapter(RecoAdapter):
         recos_response = None
         recos_dict = None
         try:
-            if not size.isdigit():
-                raise HTTPError(None, HTTPStatus.BAD_REQUEST.value, 'Invalid size type.', None, None)
-            size_int = int(size)
-            if size_int <= 0:
-                raise HTTPError(None, HTTPStatus.BAD_REQUEST.value, 'Unable to handle non-positive reco size.', None, None)
+            self.validate_reco_size(size)
+            size = int(size)
 
             audio_features = self.spotify_client.v1_audio_features(id=id)
             track_embedding = self.get_embedding(audio_features=audio_features)
-            recos = self.match_service_client.get_match(match_request={'query': track_embedding, 'num_recos': (size_int + 1)})
+            recos = self.match_service_client.get_match(match_request={'query': track_embedding, 'num_recos': (size + 1)})
             recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_response=recos[0], id=id, size=int(size))
         except HTTPError as http_error:
             print(http_error.__str__())
@@ -43,6 +40,12 @@ class V1RecoAdapter(RecoAdapter):
             recos_response = self.response_builder_factory.get_builder(status_code=client_http_error.response.status_code).build_response(recos_response=recos_dict, id=id, size=size)
         
         return recos_response
+    
+    def validate_reco_size(self, size: str) -> None:
+        if not size.isdigit():
+            raise HTTPError(None, HTTPStatus.BAD_REQUEST.value, 'Invalid size type.', None, None)
+        if int(size) <= 0:
+            raise HTTPError(None, HTTPStatus.BAD_REQUEST.value, 'Unable to handle non-positive reco size.', None, None)
     
     def get_embedding(self, audio_features: dict) -> list:
         embedding = []

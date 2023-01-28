@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import MatchNeighbor
 from requests import HTTPError as ClientHTTPError, Response
+from urllib.error import HTTPError
 from unittest.mock import patch, Mock
 import src.api.util.reco.reco_adapter as reco_adapter
 import src.api.schemas.response as response
@@ -88,6 +89,15 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
         response = self.reco_adapter.get_recos(id='id', size='1.1')
         
         self.assertEqual(400, response['status'])
+    
+    def test_should_raise_HTTPError_when__validating_invalid_reco_size_type(self) -> None:
+        self.assertRaises(HTTPError, self.reco_adapter.validate_reco_size, '1.1')
+
+    def test_should_raise_HTTPError_when_validating_invalid_reco_size_value(self) -> None:
+        self.assertRaises(HTTPError, self.reco_adapter.validate_reco_size, '0')
+
+    def test_should_not_raise_HTTPError_on_valid_reco_size(self) -> None:
+        self.reco_adapter.validate_reco_size('5')
 
     def test_should_create_correct_v1_track_embeddings(self) -> None:
         audio_features = {
