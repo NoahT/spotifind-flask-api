@@ -64,7 +64,7 @@ def deploy_index(index, index_endpoint):
     index_endpoint = None
     delta = 0
     while True:
-        index_endpoint = get_ann_index_endpoint('deployedIndexes.id={}'.format(deployed_index_id))
+        index_endpoint = get_ann_index_endpoint('deployedIndexes:("{}")'.format(deployed_index_id))
         if index_endpoint:
             break
         
@@ -78,7 +78,4 @@ def deploy_index(index, index_endpoint):
 spotifind_index = get_ann_index('labels.environment={} AND labels.version={}'.format(ENVIRONMENT, VERSION))
 spotifind_index_endpoint = get_ann_index_endpoint('labels.environment={} AND labels.region={}'.format(ENVIRONMENT, REGION))
 
-deployed_indexes = spotifind_index_endpoint.deployed_indexes
-
-if not deployed_indexes:
-    deploy_index(spotifind_index, spotifind_index_endpoint)
+deploy_index(spotifind_index, spotifind_index_endpoint)
