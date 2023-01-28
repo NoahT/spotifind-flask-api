@@ -63,12 +63,21 @@ def deploy_index(index, index_endpoint):
 
     index_endpoint = None
     delta = 0
-    while True:
-        index_endpoint = get_ann_index_endpoint('deployedIndexes:("{}")'.format(deployed_index_id))
-        if index_endpoint:
-            break
+    is_deployed = False
+    while not is_deployed:
+        try:
+            # Google cloud filtering on lists is currently not available through the Python client libraries.
+            # We instead check this directly for now.
+            index_endpoint = get_ann_index_endpoint('labels.environment={} AND labels.region={}'.format(ENVIRONMENT, REGION))
+            is_deployed = False
+            for deployed_index in index_endpoint.deployed_indexes:
+                if deployed_index.id == deployed_index_id:
+                    is_deployed = True
+                    break
+        except:
+            pass
         
-        if delta >= TIMEOUT_THRESHOLD:
+        if not is_deployed and delta >= TIMEOUT_THRESHOLD:
             raise TimeoutError()
         
         delta += 1
