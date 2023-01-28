@@ -4,7 +4,12 @@ description: Kubeflow component for ANN index service deployments
 inputs:
   - { name: peering_range, description: 'VPC peering range for ANN index deployment', type: String }
   - { name: region, description: 'Region containing ANN index endpoint deployment', type: String }
-  - { name: project_id, type: String }
+  - { name: project_number, type: String }
+  - { name: environment, description: 'The target environment for deployment (dev, staging, etc.)', type: String }
+  - { name: version, description: 'Semantic versioning for the index being deployed', type: String }
+  - { name: machine_type, description: 'Machine type for deployment (e2-standard-2, e2-standard-16, e2-highmem-16, etc.)', type: String }
+  - { name: min_replica, description: 'Minimum replica count for deployment', type: Integer }
+  - { name: max_replica, description: 'Maximum replica count for deployment', type: Integer }
 
 implementation:
   container:
@@ -14,5 +19,10 @@ implementation:
       components/pipeline_deploy.py,
       --peering-range, { inputValue: peering_range },
       --region, { inputValue: region },
-      --project-id, { inputValue: project_id }
+      --project-number, { inputValue: project_number },
+      --environment, { inputValue: environment },
+      --version, { inputValue: version },
+      --machine-type, { inputValue: machine_type },
+      --min-replica, { inputValue: min_replica },
+      --max-replica, { inputValue: max_replica }
     ]
