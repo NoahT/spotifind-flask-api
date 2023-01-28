@@ -1,6 +1,7 @@
 import unittest
 import src.api.schemas.response as response
 from http import HTTPStatus
+from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import MatchNeighbor
 
 class ResponseFactoryTestSuite(unittest.TestCase):
     def setUp(self) -> None:
@@ -70,22 +71,11 @@ class ResponseBuilderTestSuite(unittest.TestCase):
         self.assertEqual(500, internal_server_error_response.response_code)
     
     def test_should_properly_build_200_response(self):
-        recos_dict = {
-            "neighbor": [
-                {
-                    "id": "7C48cUjCGx14K5b41e9vTD",
-                    "distance": 1.0
-                },
-                {
-                    "id": "3x7gMvCsL1SS6THGwB55Pm",
-                    "distance": 2.0
-                },
-                {
-                    "id": "7sLQGgXFs4LaGAaDErPwOl",
-                    "distance": 5.0
-                }
-            ]
-        }
+        recos = [
+            MatchNeighbor('7C48cUjCGx14K5b41e9vTD', 1.0),
+            MatchNeighbor('3x7gMvCsL1SS6THGwB55Pm', 2.0),
+            MatchNeighbor('7sLQGgXFs4LaGAaDErPwOl', 5.0)
+        ]
         expected_response = {
             "recos": [
                 {
@@ -102,28 +92,17 @@ class ResponseBuilderTestSuite(unittest.TestCase):
                 }
             }
         }
-        ok_response = response.OkResponseBuilder().build_response(recos_response=recos_dict, id='123', size=2)
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos, id='123', size=2)
 
         self.assertEqual(expected_response, ok_response.response)
         self.assertEqual(200, ok_response.response_code)
     
     def test_should_properly_build_200_response_with_input_as_neighbor(self):
-        recos_dict = {
-            "neighbor": [
-                {
-                    "id": "123",
-                    "distance": 0.0
-                },
-                {
-                    "id": "3x7gMvCsL1SS6THGwB55Pm",
-                    "distance": 2.0
-                },
-                {
-                    "id": "7sLQGgXFs4LaGAaDErPwOl",
-                    "distance": 5.0
-                }
-            ]
-        }
+        recos = [
+            MatchNeighbor('123', 0.0),
+            MatchNeighbor('3x7gMvCsL1SS6THGwB55Pm', 2.0),
+            MatchNeighbor('7sLQGgXFs4LaGAaDErPwOl', 5.0)
+        ]
         expected_response = {
             "recos": [
                 {
@@ -140,10 +119,7 @@ class ResponseBuilderTestSuite(unittest.TestCase):
                 }
             }
         }
-        ok_response = response.OkResponseBuilder().build_response(recos_response=recos_dict, id='123', size=2)
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos, id='123', size=2)
 
         self.assertEqual(expected_response, ok_response.response)
         self.assertEqual(200, ok_response.response_code)
-
-if __name__ == '__main__':
-    unittest.main()

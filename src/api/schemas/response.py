@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from http import HTTPStatus
 from abc import ABC
-import json
+from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import MatchNeighbor
 
 class Response():
     def __init__(self, response: dict, response_code: int) -> None:
@@ -10,14 +10,14 @@ class Response():
 
 class ResponseBuilder(ABC):
     @abstractmethod
-    def build_response(self, recos_response: dict, id: str, size: int) -> Response:
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
         pass
 
 class BadRequestResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.BAD_REQUEST.value
 
-    def build_response(self, recos_response: dict, id: str, size: int) -> Response:
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
         response = {
             'message': 'Bad request.',
             'status': self._response_code
@@ -28,7 +28,7 @@ class NotFoundResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.NOT_FOUND.value
     
-    def build_response(self, recos_response: dict, id: str, size: int) -> Response:
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
         response = {
             'message': 'Invalid track id: {}'.format(id),
             'status': self._response_code
@@ -39,7 +39,7 @@ class InternalServerErrorResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
     
-    def build_response(self, recos_response: dict, id: str, size: int) -> Response:
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
         response = {
             'message': 'An unexpected error occurred. Please contact a contributor for assistance.',
             'status': self._response_code
@@ -50,8 +50,8 @@ class OkResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.OK.value
     
-    def build_response(self, recos_response: dict, id: str, size: int) -> Response:
-        print(json.dumps(recos_response))
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
+        print(recos_response)
         response = {
             'request': {
                 'track': {
@@ -61,7 +61,7 @@ class OkResponseBuilder(ResponseBuilder):
             }
         }
         recos = []
-        neighbors = recos_response['neighbor']
+        neighbors = [{ 'id': match_neighbor.id } for match_neighbor in recos_response]
         for reco in neighbors:
             if id != reco['id']:
                 recos.append({ 'id': reco['id'] })
