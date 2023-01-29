@@ -13,7 +13,7 @@ def id(id):
     size = request.args.get(key='size') or str(5)
 
     try:
-        response = reco_util.v1_reco_adapter.get_recos(id=id, size=size)
+        response = reco_util.v1_reco_controller.get_recos(id=id, size=size)
     except Exception:
         print(traceback.format_exc())
         response = schemas.response_builder_factory.get_builder(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(recos_response=None, id=id, size=size)

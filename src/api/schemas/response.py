@@ -1,7 +1,6 @@
 from abc import abstractmethod
 from http import HTTPStatus
 from abc import ABC
-from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import MatchNeighbor
 
 class Response():
     def __init__(self, response: dict, response_code: int) -> None:

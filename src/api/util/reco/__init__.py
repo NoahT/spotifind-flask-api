@@ -3,5 +3,7 @@ import src.api.clients.spotify_client as spotify_client
 import src.api.clients.matching_engine_client as matching_engine_client
 import src.api.schemas as schemas
 from .reco_adapter import V1RecoAdapter
+from .reco_controller import V1RecoController
 
 v1_reco_adapter = V1RecoAdapter(spotify_client.spotify_client, logging_client.logging_client, matching_engine_client.match_client_aggregator, schemas.response_builder_factory)
+v1_reco_controller = V1RecoController(v1_reco_adapter, schemas.response_builder_factory)
