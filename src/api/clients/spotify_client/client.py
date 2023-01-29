@@ -117,7 +117,7 @@ class SpotifyClient(Client):
 
         return response_json
     
-    def v1_playlist_tracks(self, playlist_id, uris, user_token) -> dict:
+    def v1_playlist_tracks(self, playlist_id, payload, user_token) -> dict:
         batch = self.logger.batch()
 
         playlist_resource = self._v1_playlist_tracks_path.format(playlist_id)
@@ -126,9 +126,6 @@ class SpotifyClient(Client):
         batch.log('Making POST call to {}'.format(playlist_resource), severity='INFO')
         batch.log('playlist_id={}'.format(playlist_id), severity='INFO')
 
-        payload = {
-            'uris': ['spotify:track:{}'.format(uri) for uri in uris]
-        }
         batch.log('payload={}'.format(json.dumps(payload)), severity='INFO')
         
         headers = {

@@ -13,16 +13,28 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
     @patch('src.api.clients.spotify_client.client.Client')
     def setUp(self, spotify_client, logging_client, client_aggregator, response_builder_factory) -> None:
         ok_response_builder = Mock(response.OkResponseBuilder)
-        ok_response_builder.build_response.return_value = {
-            'status': 200
-        }
+        ok_response_builder.build_response.return_value = response.Response(response={
+            'recos': [
+                {
+                    'id': '63h44N1oLElnzut7RxZt6Z'
+                },
+                {
+                    'id': '35RnMOsCCAySWKGdl2IcjC'
+                }
+            ]
+        }, response_code=200)
         self.ok_response_builder = ok_response_builder
+        created_response_builder = Mock(response.CreatedResponseBuilder)
+        created_response_builder.build_response.return_value = response.Response(response={}, response_code=201)
+        self.created_response_builder = created_response_builder
         
         def response_builder_factory_side_effect(**kwargs):
             response_builder = None
             status_code = kwargs['status_code']
             if status_code == HTTPStatus.OK.value:
                 response_builder = ok_response_builder
+            elif status_code == HTTPStatus.CREATED.value:
+                response_builder = created_response_builder
             
             return response_builder
         
@@ -52,7 +64,7 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
 
         response = self.reco_adapter.get_recos(id='id', size='5')
 
-        self.assertEqual(200, response['status'])
+        self.assertEqual(200, response.response_code)
 
     def test_should_raise_HTTPError_when__validating_invalid_reco_size_type(self) -> None:
         self.assertRaises(HTTPError, self.reco_adapter.validate_reco_size, '1.1')
@@ -95,3 +107,91 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
         }
         
         self.assertRaises(KeyError, self.reco_adapter.get_embedding, audio_features)
+
+    def test_should_properly_create_v1_playlist_tracks_payload(self) -> None:
+        recos_response = {
+            'recos': [
+                {
+                    'id': '4JnCD65HeEbeTumgu6xEl3'
+                },
+                {
+                    'id': '0iCxoVGB01iGIBgyFgovyt'
+                }
+            ],
+            'request': {
+                'size': '2',
+                'track': {
+                    'id': '2TRu7dMps7cVKOyazkj9Fb'
+                }
+            }
+        }
+
+        v1_playlists_tracks_payload = self.reco_adapter.get_v1_playlist_tracks_payload(recos_response=recos_response)
+
+        self.assertEqual
+        (
+            {
+                'uris': [
+                    'spotify:track:4JnCD65HeEbeTumgu6xEl3',
+                    'spotify:track:0iCxoVGB01iGIBgyFgovyt'
+                ]
+            },
+            v1_playlists_tracks_payload
+        )
+    
+    def test_should_properly_create_v1_playlist_on_happy_path(self) -> None:
+        self.reco_adapter.spotify_client.v1_audio_features.return_value = {
+            'danceability': 1,
+            'energy': 2,
+            'key': 3,
+            'loudness': 4,
+            'mode': 5,
+            'speechiness': 6,
+            'acousticness': 7,
+            'instrumentalness': 8,
+            'liveness': 9,
+            'valence': 10,
+            'tempo': 11
+        }
+        self.reco_adapter.match_service_client.get_match.return_value = [
+            MatchNeighbor('7C48cUjCGx14K5b41e9vTD', 1.0),
+            MatchNeighbor('3x7gMvCsL1SS6THGwB55Pm', 2.0),
+            MatchNeighbor('7sLQGgXFs4LaGAaDErPwOl', 5.0)
+        ]
+        self.reco_adapter.spotify_client.v1_create_playlist.return_value = {
+            'id': 'playlist_id'
+        }
+
+        create_playlist_response = self.reco_adapter.create_playlist(user_id='user_id', track_id='track_id', user_token='user_token', size='2')
+
+        self.assertEqual(201, create_playlist_response.response_code)
+        
+    def test_should_raise_HTTPError_for_v1_playlist_on_get_recos_failure(self) -> None:
+        self.assertRaises(HTTPError, self.reco_adapter.create_playlist, 'user_id', 'track_id', 'user_token', '0')
+
+    def test_should_raise_HTTPError_for_v1_playlist_on_missing_authentication(self) -> None:
+        self.reco_adapter.spotify_client.v1_audio_features.return_value = {
+            'danceability': 1,
+            'energy': 2,
+            'key': 3,
+            'loudness': 4,
+            'mode': 5,
+            'speechiness': 6,
+            'acousticness': 7,
+            'instrumentalness': 8,
+            'liveness': 9,
+            'valence': 10,
+            'tempo': 11
+        }
+        self.reco_adapter.match_service_client.get_match.return_value = [
+            MatchNeighbor('7C48cUjCGx14K5b41e9vTD', 1.0),
+            MatchNeighbor('3x7gMvCsL1SS6THGwB55Pm', 2.0),
+            MatchNeighbor('7sLQGgXFs4LaGAaDErPwOl', 5.0)
+        ]
+        
+        def side_effect(user_id, user_token):
+            raise HTTPError(url='url', code=401, msg='msg', hdrs=None, fp=None)
+        
+        self.reco_adapter.spotify_client.v1_create_playlist.side_effect = side_effect
+        
+        self.assertRaises(HTTPError, self.reco_adapter.create_playlist, 'user_id', 'track_id', 'user_token', '2')
