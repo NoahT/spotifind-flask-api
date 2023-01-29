@@ -47,7 +47,7 @@ class ResponseFactoryTestSuite(unittest.TestCase):
 
 class ResponseBuilderTestSuite(unittest.TestCase):
     def test_should_properly_build_400_response(self):
-        bad_request_response = response.BadRequestResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        bad_request_response = response.BadRequestResponseBuilder().build_response(recos_response={}, track_id='123', size=5)
         response_400 = {
             "message": "Bad request.",
             "status": 400
@@ -57,7 +57,7 @@ class ResponseBuilderTestSuite(unittest.TestCase):
         self.assertEqual(400, bad_request_response.response_code)
     
     def test_should_properly_build_401_response(self):
-        unauthorized_response = response.UnauthorizedResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        unauthorized_response = response.UnauthorizedResponseBuilder().build_response(recos_response={}, track_id='123', size=5)
         response_401 = {
             'message': 'Valid authentication credentials not provided.',
             'status': 401
@@ -67,7 +67,7 @@ class ResponseBuilderTestSuite(unittest.TestCase):
         self.assertEqual(401, unauthorized_response.response_code)
     
     def test_should_properly_build_403_response(self):
-        forbidden_response = response.ForbiddenResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        forbidden_response = response.ForbiddenResponseBuilder().build_response(recos_response={}, track_id='123', size=5)
         response_403 = {
             'message': 'Insufficient authentication credentials.',
             'status': 403
@@ -77,7 +77,7 @@ class ResponseBuilderTestSuite(unittest.TestCase):
         self.assertEqual(403, forbidden_response.response_code)
     
     def test_should_properly_build_404_response(self):
-        not_found_response = response.NotFoundResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        not_found_response = response.NotFoundResponseBuilder().build_response(recos_response={}, track_id='123', size=5)
         response_404 = {
             "message": "Invalid track id: 123",
             "status": 404
@@ -87,7 +87,7 @@ class ResponseBuilderTestSuite(unittest.TestCase):
         self.assertEqual(404, not_found_response.response_code)
     
     def test_should_properly_build_500_response(self):
-        internal_server_error_response = response.InternalServerErrorResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        internal_server_error_response = response.InternalServerErrorResponseBuilder().build_response(recos_response={}, track_id='123', size=5)
         response_500 = {
             'message': 'An unexpected error occurred. Please contact a contributor for assistance.',
             'status': 500
@@ -118,7 +118,7 @@ class ResponseBuilderTestSuite(unittest.TestCase):
                 }
             }
         }
-        ok_response = response.OkResponseBuilder().build_response(recos_response=recos, id='123', size=2)
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos, track_id='123', size=2)
 
         self.assertEqual(expected_response, ok_response.response)
         self.assertEqual(200, ok_response.response_code)
@@ -145,13 +145,14 @@ class ResponseBuilderTestSuite(unittest.TestCase):
                 }
             }
         }
-        ok_response = response.OkResponseBuilder().build_response(recos_response=recos, id='123', size=2)
+        ok_response = response.OkResponseBuilder().build_response(recos_response=recos, track_id='123', size=2)
 
         self.assertEqual(expected_response, ok_response.response)
         self.assertEqual(200, ok_response.response_code)
     
     def test_should_properly_build_201_response(self):
-        created_response = response.CreatedResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        created_response = response.CreatedResponseBuilder().build_response(recos_response={}, track_id='123', size=5, playlist_id='playlist_id')
 
         self.assertEqual({}, created_response.response)
         self.assertEqual(201, created_response.response_code)
+        self.assertEqual('https://api.spotify.com/v1/playlists/playlist_id', created_response.response_headers.get('Location', type=str))
