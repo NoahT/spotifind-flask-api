@@ -1,11 +1,11 @@
-# Business and Engineering Requirements (1/10/23)
+# Business and Engineering Requirements (1/28/23)
 We are primarily interested in briefly documenting business and engineering requirements for this web application to constrain our problem space.
 
 ## Component Level Design
 ### GET::/v1/reco/{id*}
-| Resource  | Description | Type | Parameters |
-| ------------- | ------------- | ------------- | ------------- |
-| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations <br> **size** - Number of recommendations to return. Default size 5 | 
+| Resource  | Description | Type | Path parameters | Query parameters |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5
 
 #### HTTP response status codes
 | Status code | Description |
@@ -98,10 +98,10 @@ HTTPS/1.1 404 NOT FOUND
 }
 ```
 
-### POST::/v1/playlist/{id*}
-| Resource  | Description | Type | Parameters |
-| ------------- | ------------- | ------------- | ------------- |
-| /v1/playlist/{id*}  | Create Spotify playlist with recommended tracks based on the given track id | POST | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate. Default size 5 | 
+### POST::/v1/playlist/{user_id*}/{track_id*}
+| Resource  | Description | Type | Path parameters | Query parameters |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| /v1/playlist/{id*}  | Create Spotify playlist with recommended tracks based on the given track id | POST | **user_id** - Spotify user ID to generate the playlist for (i.e. noahteshima) <br> **track_id** - Spotify track ID to use when generating playlist | **size** - Size of the playlist to generate. Default size 5
 
 #### HTTP response status codes
 | Status code | Description |
@@ -126,7 +126,7 @@ HTTPS/1.1 404 NOT FOUND
 #### Sample requests
 **Request**
 ```
-POST /v1/playlist/56PBFnmomWOmjg8eZulmMo?size=5 HTTPS/1.1
+POST /v1/playlist/noahteshima/56PBFnmomWOmjg8eZulmMo?size=5 HTTPS/1.1
 Host: spotifind-api.com
 Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
 ```
@@ -142,7 +142,7 @@ Location: https://api.spotify.com/v1/playlists/5Rfv2LUBWVu0llq1Oze6yH
 
 **Request**
 ```
-POST /v1/playlist/invalid_id HTTPS/1.1
+POST /v1/playlist/noahteshima/invalid_id HTTPS/1.1
 Host: spotifind-api.com
 Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
 ```
@@ -162,7 +162,7 @@ HTTPS/1.1 404 Not Found
 
 **Request**
 ```
-POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
+POST /v1/playlist/noahteshima/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
 Host: spotifind-api.com
 ```
 
@@ -183,7 +183,7 @@ HTTPS/1.1 401 Unauthorized.
 
 Suppose `insufficient_token` is a token missing the [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public) or [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes.
 ```
-POST /v1/playlist/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
+POST /v1/playlist/noahteshima/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
 Host: spotifind-api.com
 Authorization: Bearer insufficient_token
 ```
