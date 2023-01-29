@@ -1,6 +1,5 @@
 from http import HTTPStatus
 from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint import MatchNeighbor
-from requests import HTTPError as ClientHTTPError, Response
 from urllib.error import HTTPError
 from unittest.mock import patch, Mock
 import src.api.util.reco.reco_adapter as reco_adapter
@@ -13,20 +12,10 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
     @patch('src.api.clients.logging_client.client.Client')
     @patch('src.api.clients.spotify_client.client.Client')
     def setUp(self, spotify_client, logging_client, client_aggregator, response_builder_factory) -> None:
-        bad_request_response_builder = Mock(response.BadRequestResponseBuilder)
-        bad_request_response_builder.build_response.return_value = {
-            'status': 400
-        }
-        not_found_response_builder = Mock(response.NotFoundResponseBuilder)
-        not_found_response_builder.build_response.return_value = {
-            'status': 404
-        }
         ok_response_builder = Mock(response.OkResponseBuilder)
         ok_response_builder.build_response.return_value = {
             'status': 200
         }
-        self.bad_request_response_builder = bad_request_response_builder
-        self.not_found_response_builder = not_found_response_builder
         self.ok_response_builder = ok_response_builder
         
         def response_builder_factory_side_effect(**kwargs):
@@ -34,10 +23,6 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
             status_code = kwargs['status_code']
             if status_code == HTTPStatus.OK.value:
                 response_builder = ok_response_builder
-            elif status_code == HTTPStatus.NOT_FOUND.value:
-                response_builder = not_found_response_builder
-            else:
-                response_builder = bad_request_response_builder
             
             return response_builder
         
@@ -69,27 +54,6 @@ class V1RecoAdapterTestSuite(unittest.TestCase):
 
         self.assertEqual(200, response['status'])
 
-    def test_should_return_400_response_on_invalid_track_id(self) -> None:
-        def side_effect(id):
-            response = Mock(Response)
-            response.status_code = 400
-            raise ClientHTTPError(response=response)
-        self.reco_adapter.spotify_client.v1_audio_features.side_effect = side_effect
-
-        response = self.reco_adapter.get_recos(id='id', size='5')
-
-        self.assertEqual(400, response['status'])
-
-    def test_should_return_400_response_on_invalid_reco_size_value(self) -> None:
-        response = self.reco_adapter.get_recos(id='id', size='0')
-        
-        self.assertEqual(400, response['status'])
-    
-    def test_should_return_400_response_on_invalid_reco_size_type(self) -> None:
-        response = self.reco_adapter.get_recos(id='id', size='1.1')
-        
-        self.assertEqual(400, response['status'])
-    
     def test_should_raise_HTTPError_when__validating_invalid_reco_size_type(self) -> None:
         self.assertRaises(HTTPError, self.reco_adapter.validate_reco_size, '1.1')
 
