@@ -6,14 +6,20 @@ from google.cloud.aiplatform.matching_engine.matching_engine_index_endpoint impo
 class ResponseFactoryTestSuite(unittest.TestCase):
     def setUp(self) -> None:
         self._bad_request_response_builder = response.BadRequestResponseBuilder()
+        self._unauthorized_response_builder = response.UnauthorizedResponseBuilder()
+        self._forbidden_response_builder = response.ForbiddenResponseBuilder()
         self._not_found_response_builder = response.NotFoundResponseBuilder()
         self._internal_server_error_builder = response.InternalServerErrorResponseBuilder()
         self._ok_response_builder = response.OkResponseBuilder()
+        self._created_response_builder = response.CreatedResponseBuilder()
         self._response_builder_factory = response.ResponseBuilderFactory(
-            self._bad_request_response_builder,
-            self._not_found_response_builder,
-            self._internal_server_error_builder,
-            self._ok_response_builder
+            bad_request_builder=self._bad_request_response_builder,
+            unauthorized_builder=self._unauthorized_response_builder,
+            forbidden_builder=self._forbidden_response_builder,
+            not_found_builder=self._not_found_response_builder,
+            internal_server_error_builder=self._internal_server_error_builder,
+            ok_builder=self._ok_response_builder,
+            created_builder=self._created_response_builder
         )
     
     def test_should_return_bad_request_response_builder_on_400(self):
@@ -49,6 +55,26 @@ class ResponseBuilderTestSuite(unittest.TestCase):
 
         self.assertEqual(response_400, bad_request_response.response)
         self.assertEqual(400, bad_request_response.response_code)
+    
+    def test_should_properly_build_401_response(self):
+        unauthorized_response = response.UnauthorizedResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        response_401 = {
+            'message': 'Valid authentication credentials not provided.',
+            'status': 401
+        }
+
+        self.assertEqual(response_401, unauthorized_response.response)
+        self.assertEqual(401, unauthorized_response.response_code)
+    
+    def test_should_properly_build_403_response(self):
+        forbidden_response = response.ForbiddenResponseBuilder().build_response(recos_response={}, id='123', size=5)
+        response_403 = {
+            'message': 'Insufficient authentication credentials.',
+            'status': 403
+        }
+
+        self.assertEqual(response_403, forbidden_response.response)
+        self.assertEqual(403, forbidden_response.response_code)
     
     def test_should_properly_build_404_response(self):
         not_found_response = response.NotFoundResponseBuilder().build_response(recos_response={}, id='123', size=5)
@@ -123,3 +149,9 @@ class ResponseBuilderTestSuite(unittest.TestCase):
 
         self.assertEqual(expected_response, ok_response.response)
         self.assertEqual(200, ok_response.response_code)
+    
+    def test_should_properly_build_201_response(self):
+        created_response = response.CreatedResponseBuilder().build_response(recos_response={}, id='123', size=5)
+
+        self.assertEqual({}, created_response.response)
+        self.assertEqual(201, created_response.response_code)

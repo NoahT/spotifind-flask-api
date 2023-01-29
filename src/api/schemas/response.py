@@ -23,6 +23,30 @@ class BadRequestResponseBuilder(ResponseBuilder):
         }
         return Response(response=response, response_code=self._response_code)
 
+class UnauthorizedResponseBuilder(ResponseBuilder):
+    def __init__(self) -> None:
+        self._response_code = HTTPStatus.UNAUTHORIZED.value
+    
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
+        response = {
+            'message': 'Valid authentication credentials not provided.',
+            'status': self._response_code
+        }
+
+        return Response(response=response, response_code=self._response_code)
+
+class ForbiddenResponseBuilder(ResponseBuilder):
+    def __init__(self) -> None:
+        self._response_code = HTTPStatus.FORBIDDEN.value
+    
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
+        response = {
+            'message': 'Insufficient authentication credentials.',
+            'status': self._response_code
+        }
+
+        return Response(response=response, response_code=self._response_code)
+
 class NotFoundResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
         self._response_code = HTTPStatus.NOT_FOUND.value
@@ -44,6 +68,13 @@ class InternalServerErrorResponseBuilder(ResponseBuilder):
             'status': self._response_code
         }
         return Response(response=response, response_code=self._response_code)
+
+class CreatedResponseBuilder(ResponseBuilder):
+    def __init__(self) -> None:
+        self._response_code = HTTPStatus.CREATED.value
+    
+    def build_response(self, recos_response: list, id: str, size: int) -> Response:
+        return Response(response={}, response_code=self._response_code)
 
 class OkResponseBuilder(ResponseBuilder):
     def __init__(self) -> None:
@@ -70,22 +101,31 @@ class OkResponseBuilder(ResponseBuilder):
         return Response(response=response, response_code=self._response_code)
 
 class ResponseBuilderFactory():
-    def __init__(self, bad_request_builder=BadRequestResponseBuilder(), not_found_builder=NotFoundResponseBuilder(), internal_server_error_builder=InternalServerErrorResponseBuilder(), ok_builder=OkResponseBuilder()) -> None:
-        self._bad_request_builder = bad_request_builder
-        self._not_found_builder = not_found_builder
-        self._internal_server_error_builder = internal_server_error_builder
-        self._ok_builder = ok_builder
+    def __init__(self, **kwargs) -> None:
+        self._bad_request_builder = kwargs['bad_request_builder']
+        self._unauthorized_builder = kwargs['unauthorized_builder']
+        self._forbidden_builder = kwargs['forbidden_builder']
+        self._not_found_builder = kwargs['not_found_builder']
+        self._internal_server_error_builder = kwargs['internal_server_error_builder']
+        self._ok_builder = kwargs['ok_builder']
+        self._created_builder = kwargs['created_builder']
     
     def get_builder(self, status_code: int) -> ResponseBuilder:
         builder = None
         if status_code == HTTPStatus.BAD_REQUEST.value:
             builder = self._bad_request_builder
+        elif status_code == HTTPStatus.UNAUTHORIZED.value:
+            builder = self._unauthorized_builder
+        elif status_code == HTTPStatus.FORBIDDEN.value:
+            builder = self._forbidden_builder
         elif status_code == HTTPStatus.NOT_FOUND.value:
             builder = self._not_found_builder
         elif status_code == HTTPStatus.INTERNAL_SERVER_ERROR.value:
             builder = self._internal_server_error_builder
         elif status_code == HTTPStatus.OK.value:
             builder = self._ok_builder
+        elif status_code == HTTPStatus.CREATED.value:
+            builder = self._created_builder
         else:
             raise ValueError('Invalid or unsupported status code: {}'.format(status_code))
         return builder
