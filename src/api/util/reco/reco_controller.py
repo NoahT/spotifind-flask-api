@@ -20,10 +20,10 @@ class V1RecoController(RecoController):
             recos_response = self._reco_adapter.get_recos(id, size)
         except HTTPError as http_error:
             print(http_error.__str__())
-            recos_response = self._response_builder_factory.get_builder(status_code=http_error.code).build_response(recos_response=None, id=id, size=size)
+            recos_response = self._response_builder_factory.get_builder(status_code=http_error.code).build_response(recos_response=None, track_id=id, size=size)
         except ClientHTTPError as client_http_error:
             print(client_http_error.__str__())
-            recos_response = self._response_builder_factory.get_builder(status_code=client_http_error.response.status_code).build_response(recos_response=None, id=id, size=size)
+            recos_response = self._response_builder_factory.get_builder(status_code=client_http_error.response.status_code).build_response(recos_response=None, track_id=id, size=size)
         
         return recos_response
 

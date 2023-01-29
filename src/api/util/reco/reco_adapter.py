@@ -38,7 +38,7 @@ class V1RecoAdapter(RecoAdapter):
         audio_features = self.spotify_client.v1_audio_features(id=id)
         track_embedding = self.get_embedding(audio_features=audio_features)
         recos = self.match_service_client.get_match(match_request={'query': track_embedding, 'num_recos': (size + 1)})
-        recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_response=recos[0], id=id, size=int(size))
+        recos_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.OK.value).build_response(recos_response=recos[0], track_id=id, size=int(size))
         
         return recos_response
     
