@@ -26,4 +26,17 @@ class V1RecoController(RecoController):
             recos_response = self._response_builder_factory.get_builder(status_code=client_http_error.response.status_code).build_response(recos_response=None, track_id=id, size=size)
         
         return recos_response
+    
+    def create_playlist(self, user_id: str, track_id: str, user_token: str, size: int) -> response.Response:
+        reco_playlist_response = None
 
+        try:
+            reco_playlist_response = self._reco_adapter.create_playlist(user_id=user_id, track_id=track_id, user_token=user_token, size=size)
+        except HTTPError as http_error:
+            print(http_error.__str__())
+            reco_playlist_response = self._response_builder_factory.get_builder(status_code=http_error.code).build_response(recos_response=None, track_id=id, size=size)
+        except ClientHTTPError as client_http_error:
+            print(client_http_error.__str__())
+            reco_playlist_response = self._response_builder_factory.get_builder(status_code=client_http_error.response.status_code).build_response(recos_response=None, track_id=id, size=size)
+        
+        return reco_playlist_response

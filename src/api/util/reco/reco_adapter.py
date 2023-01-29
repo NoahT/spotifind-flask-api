@@ -8,7 +8,11 @@ import src.api.schemas.response as response
 
 class RecoAdapter(ABC):
     @abstractmethod
-    def get_recos(id: str, size: int) -> dict:
+    def get_recos(id: str, size: int) -> response.Response:
+        pass
+
+    @abstractmethod
+    def create_playlist(self, user_id: str, track_id: str, user_token: str, size: str) -> response.Response:
         pass
 
 class V1RecoAdapter(RecoAdapter):
@@ -42,6 +46,31 @@ class V1RecoAdapter(RecoAdapter):
         
         return recos_response
     
+    def create_playlist(self, user_id: str, track_id: str, user_token: str, size: str) -> response.Response:
+        recos_response = self.get_recos(id=track_id, size=size)
+        size = int(size)
+        recos_response = recos_response.response
+        v1_playlist_tracks_payload = self.get_v1_playlist_tracks_payload(recos_response=recos_response)
+        
+        create_playlist_response = self.spotify_client.v1_create_playlist(user_id=user_id, user_token=user_token)
+        playlist_id = create_playlist_response['id']
+        
+        self.spotify_client.v1_playlist_tracks(playlist_id=playlist_id, payload=v1_playlist_tracks_payload, user_token=user_token)
+
+        reco_playlist_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.CREATED.value).build_response(recos_response={}, track_id=track_id, size=size, playlist_id=playlist_id)
+
+        return reco_playlist_response
+
+    def get_v1_playlist_tracks_payload(self, recos_response: dict) -> dict:
+        recos_dict = recos_response['recos']
+        v1_playlist_tracks_payload = {
+            'uris': [
+                'spotify:track:{}'.format(reco['id']) for reco in recos_dict
+            ]
+        }
+
+        return v1_playlist_tracks_payload
+
     def validate_reco_size(self, size: str) -> None:
         if not size.isdigit():
             raise HTTPError(None, HTTPStatus.BAD_REQUEST.value, 'Invalid size type.', None, None)
