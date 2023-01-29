@@ -55,7 +55,7 @@ class V1RecoAdapter(RecoAdapter):
         create_playlist_response = self.spotify_client.v1_create_playlist(user_id=user_id, user_token=user_token)
         playlist_id = create_playlist_response['id']
         
-        self.spotify_client.v1_playlist_tracks(playlist_id=playlist_id, uris=v1_playlist_tracks_payload, user_token=user_token)
+        self.spotify_client.v1_playlist_tracks(playlist_id=playlist_id, payload=v1_playlist_tracks_payload, user_token=user_token)
 
         reco_playlist_response = self.response_builder_factory.get_builder(status_code=HTTPStatus.CREATED.value).build_response(recos_response={}, track_id=track_id, size=size, playlist_id=playlist_id)
 
