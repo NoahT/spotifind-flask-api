@@ -33,9 +33,9 @@ Spotifind API is exposed behind two endpoints. Note that HTTPS is the required p
 ### Resources
 
 #### /v1/reco/{id*}
-| Resource  | Description | Type | Parameters |
-| ------------- | ------------- | ------------- | ------------- |
-| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when generating playlist <br> **size** - Size of the playlist to generate. Default size 10 | 
+| Resource  | Description | Type | Path parameters | Query parameters |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5
 
 ##### HTTP response status codes
 | Status code | Description |
