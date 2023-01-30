@@ -180,7 +180,7 @@ Create a Spotify playlist containing recommended Spotify track URIs based on an 
 | Authorization  | Bearer {token}, where `token` is a Bearer token from [Spotify](https://developer.spotify.com/documentation/general/guides/authorization/scopes/) with [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public), [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes |
 
 ##### Response headers
-| Request header | Value(s) |
+| Response header | Value(s) |
 | ------------- | ------------- |
 | Location  | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
 
