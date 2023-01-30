@@ -287,7 +287,7 @@ Spotifind API makes use of the following stack. Feel free to install these with 
 ### Development
 
 #### Branching strategy
-Before making any changes on this project, please make sure to follow the branching strategy established. We currently are unable to set up branch protections since this is a private repository, so good Git hygiene is necessary. For this repository, we use [Github flow](https://docs.github.com/en/get-started/quickstart/github-flow) which is a relatively straightforward branching strategy for new changes we want to introduce on the trunk.
+Before making any changes on this project, please make sure to follow the branching strategy established to maintain good version control hygiene. For this repository, we use [Github flow](https://docs.github.com/en/get-started/quickstart/github-flow) which is a relatively straightforward branching strategy for new changes we want to introduce on the trunk.
 
 ### Making changes
 
