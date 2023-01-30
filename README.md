@@ -1,6 +1,33 @@
 # Spotifind REST API
 REST API for recommending tracks and creating playlists on Spotify.
 
+## Table of contents
+- [Spotifind REST API](#spotifind-rest-api)
+  - [Table of contents](#table-of-contents)
+  - [Overview](#overview)
+    - [How the recommendations work](#how-the-recommendations-work)
+  - [Architecture for GET::/v1/reco/{id\*}](#architecture-for-getv1recoid)
+  - [Architecture for POST::/v1/playlist/{user\_id\*}/{track\_id\*}](#architecture-for-postv1playlistuser_idtrack_id)
+  - [API Documentation](#api-documentation)
+    - [Endpoints](#endpoints)
+    - [Resources](#resources)
+      - [GET::/v1/reco/{id\*}](#getv1recoid)
+        - [HTTP response status codes](#http-response-status-codes)
+        - [Example Usage](#example-usage)
+      - [POST::/v1/playlist/{user\_id\*}/{track\_id\*}](#postv1playlistuser_idtrack_id)
+        - [HTTP response status codes](#http-response-status-codes-1)
+        - [Request headers](#request-headers)
+        - [Response headers](#response-headers)
+        - [Example Usage](#example-usage-1)
+  - [Contributions](#contributions)
+    - [Installation](#installation)
+    - [Development](#development)
+      - [Branching strategy](#branching-strategy)
+    - [Making changes](#making-changes)
+    - [Testing](#testing)
+      - [Unit testing](#unit-testing)
+      - [Integration testing](#integration-testing)
+
 ## Overview
 Spotifind is a REST web service that provides the ability to provide any number of Spotify track recommendations based on any available input track.
 
@@ -14,12 +41,17 @@ We motivate understanding by the following constraints imposed on our API:
 For the first contraint imposed above, in order to make recommendations, our API exploits a [content-based filtering](https://developers.google.com/machine-learning/recommendation/content-based/basics) machine learning strategy, where Spotify track recommendations are made based on the affinity to the input track. With respect to the second contraint, a nearest neighbors strategy naturally evolves from the need to provide recommendations on demand. Since we wish for recommendations to remain low-latent as the possible track recommendations scale, it uses [Vertex AI Matching Engine](https://cloud.google.com/vertex-ai/docs/matching-engine/overview); this allows our API to provide low-latency response times for any number of requested recommendations at a high scale.
 
 
-Below is the current iteration for the system architecture. The core components are outlined as follows:
-- The recommender system sits behind the REST API which calling clients interface with. The resource on this API used to get recommendations is `/v1/reco/{id*}`, where **id** denotes the input Spotify track ID.
+Below is the current iteration for the system architecture for both APIs. The core components are outlined as follows:
+- The recommender system sits behind the REST API which calling clients interface with. The resource on this API used to get recommendations is `GET::/v1/reco/{id*}`, where **id** denotes the input Spotify track ID.
 - The recommender system downstream is contained inside of a [gRPC](https://grpc.io/) web service. A data lake is created containing Spotify track IDs and corresponding features from the Spotify [audio features](https://developer.spotify.com/console/get-audio-features-track/) API (liveness, tempo, danceability, etc.) with roughly 100,000 songs. Using these features, a special kind of vector space called a [feature space](https://pages.cs.wisc.edu/~bsettles/cs540/lectures/16_feature_spaces.pdf) is created containing an embedding (representation) of all Spotify tracks used for recommendation output. This data lake is used by the Vertex AI machine learning platform to build an index that is needed for low-latent nearest neighbors searches.
 - For input songs, the [client credentials flow](https://developer.spotify.com/documentation/general/guides/authorization/client-credentials/) is used for authentication: a call to Spotify's `/api/token` API is made first, with a sequential service call being made to the Spotify [audio features](https://developer.spotify.com/console/get-audio-features-track/) API in order to embed the input song into our feature space. From here, our gRPC service takes this track embedding as input and returns the nearest neighbors as track embeddings for the recommended songs.
+- For the `POST::/v1/playlist/{user_id*}/{track_id*}` API, Bearer token authentication is required: since the creation of playlists does not only make use of read-only operations on public resources, calling clients need to include the [Authorization](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Authorization) request header with [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public), [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes.
 
-[![Spotifind system architecture](specs/diagrams/architecture/component_diagram_get_v1_reco_id.drawio.png)](specs/diagrams/architecture/component_diagram_get_v1_reco_id.drawio.png)
+## Architecture for GET::/v1/reco/{id*}
+[![Spotifind system architecture GET::/v1/reco/{id*}](specs/diagrams/architecture/component_diagram_get_v1_reco_id.drawio.png)](specs/diagrams/architecture/component_diagram_get_v1_reco_id.drawio.png)
+
+## Architecture for POST::/v1/playlist/{user_id*}/{track_id*}
+[![Spotifind system architecture POST::/v1/playlist/{user_id*}/{track_id*}](specs/diagrams/architecture/component_diagram_post_v1_playlist_id.drawio.png)](specs/diagrams/architecture/component_diagram_post_v1_playlist_id.drawio.png)
 
 ## API Documentation
 Spotifind is a REST web service. Any HTTP client can be used in order to interface with the API. A Postman collection for the existing resources can be found [here](https://www.getpostman.com/collections/3227a5bf7a781f5bfd65).
@@ -32,7 +64,9 @@ Spotifind API is exposed behind two endpoints. Note that HTTPS is the required p
 
 ### Resources
 
-#### /v1/reco/{id*}
+#### GET::/v1/reco/{id*}
+Get recommendations for Spotify track URIs based on an input track URI.
+
 | Resource  | Description | Type | Path parameters | Query parameters |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
 | /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5
@@ -45,7 +79,7 @@ Spotifind API is exposed behind two endpoints. Note that HTTPS is the required p
 | 404  | Client failure due to invalid track id |
 | 500  | Miscellaneous service failure |
 
-### Example Usage
+##### Example Usage
 **Request**
 ```
 GET /v1/reco/62BGM9bNkNcvOh13B4wOyr?size=5 HTTPS/1.1
@@ -123,6 +157,111 @@ HTTPS/1.1 404 NOT FOUND
 }
 ```
 
+#### POST::/v1/playlist/{user_id*}/{track_id*}
+Create a Spotify playlist containing recommended Spotify track URIs based on an input track URI for a target user.
+
+| Resource  | Description | Type | Path parameters | Query parameters |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| /v1/playlist/{id*}  | Create Spotify playlist with recommended tracks based on the given track id | POST | **user_id** - Spotify user ID to generate the playlist for (i.e. noahteshima) <br> **track_id** - Spotify track ID to use when generating playlist | **size** - Size of the playlist to generate. Default size 5
+
+##### HTTP response status codes
+| Status code | Description |
+| ------------- | ------------- |
+| 201  | When Spotify playlist is created successfully |
+| 400  | Miscellaneous client failure |
+| 401  | Client failure due to missing `Authorization` header |
+| 403  | Client failure due to insufficient scopes in `Authorization` header |
+| 404  | Client failure due to invalid track id |
+| 500  | Miscellaneous service failure |
+
+##### Request headers
+| Request header | Value(s) |
+| ------------- | ------------- |
+| Authorization  | Bearer {token}, where `token` is a Bearer token from [Spotify](https://developer.spotify.com/documentation/general/guides/authorization/scopes/) with [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public), [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes |
+
+##### Response headers
+| Response header | Value(s) |
+| ------------- | ------------- |
+| Location  | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
+
+##### Example Usage
+**Request**
+```
+POST /v1/playlist/noahteshima/56PBFnmomWOmjg8eZulmMo?size=5 HTTPS/1.1
+Host: spotifind-api.com
+Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
+```
+**Response (201)**
+
+(Note that the response body is intentionally empty.)
+```
+HTTPS/1.1 201 Created
+. . . // Miscellaneous response headers
+Location: https://api.spotify.com/v1/playlists/5Rfv2LUBWVu0llq1Oze6yH
+. . . // Rest of HTTP message
+```
+
+**Request**
+```
+POST /v1/playlist/noahteshima/invalid_id HTTPS/1.1
+Host: spotifind-api.com
+Authorization: Bearer BQCtdcGa_MtSUA-CSW3HzGjyRHMIXaKzu-pUw8i1_xSJMNgffBaRJA4MQkBDwtOTSNZ-yazOMX8nfhKP-ZE_avChppdubl6k5HfosLHAcrAc6M2HBGZnvG_Ak0VNZU1gch0y9h-IiSjjq12uMpDfsqOlwUkjK25j815P0YddYEY8EacUSHcrNhzCe5aO9w9gMfl0eYnzeniIbASzS4uc8L61aiSRzYe4eIHqbc-vrn6wkQ
+```
+
+**Response (404)**
+```
+HTTPS/1.1 404 Not Found
+. . . // Miscellaneous response headers
+
+{
+  "error": {
+    "status": 404,
+    "message": "Invalid track id."
+  }
+}
+```
+
+**Request**
+```
+POST /v1/playlist/noahteshima/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
+Host: spotifind-api.com
+```
+
+**Response (401)**
+```
+HTTPS/1.1 401 Unauthorized.
+. . . // Miscellaneous response headers
+
+{
+  "error": {
+    "status": 401,
+    "message": "Valid authentication credentials not provided."
+  }
+}
+```
+
+**Request**
+
+Suppose `insufficient_token` is a token missing the [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public) or [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes.
+```
+POST /v1/playlist/noahteshima/56PBFnmomWOmjg8eZulmMo HTTPS/1.1
+Host: spotifind-api.com
+Authorization: Bearer insufficient_token
+```
+
+**Response (403)**
+```
+HTTPS/1.1 403 Forbidden
+. . . // Miscellaneous response headers
+
+{
+  "error": {
+    "status": 403,
+    "message": "Insufficient authentication credentials."
+  }
+}
+```
+
 ## Contributions
 Outside contributions are currently only allowed on an invite-only basis. The following guide is put together to help with onboarding.
 
@@ -148,7 +287,7 @@ Spotifind API makes use of the following stack. Feel free to install these with 
 ### Development
 
 #### Branching strategy
-Before making any changes on this project, please make sure to follow the branching strategy established. We currently are unable to set up branch protections since this is a private repository, so good Git hygiene is necessary. For this repository, we use [Github flow](https://docs.github.com/en/get-started/quickstart/github-flow) which is a relatively straightforward branching strategy for new changes we want to introduce on the trunk.
+Before making any changes on this project, please make sure to follow the branching strategy established to maintain good version control hygiene. For this repository, we use [Github flow](https://docs.github.com/en/get-started/quickstart/github-flow) which is a relatively straightforward branching strategy for new changes we want to introduce on the trunk.
 
 ### Making changes
 
