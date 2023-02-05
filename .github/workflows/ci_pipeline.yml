@@ -5,6 +5,7 @@ on:
     - main
 jobs:
   unit_tests:
+    name: Unit test regression
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,3 +20,15 @@ jobs:
         # Could not find any documentation on mocking google cloud client libraries for unit tests. We mock credentials as an alternative.
         env:
           GOOGLE_APPLICATION_CREDENTIALS: test/unit_tests/mock_secret.json
+  lint_check:
+    name: Pylint check
+    runs-on: ubuntu-latest
+    needs: unit_tests
+    steps:
+      - uses: actions/checkout@v2  
+      - name: Python Linter
+        uses: sunnysid3up/python-linter@master
+        with:
+          source: "src/"
+          pylint-options: "--rcfile=.pylintrc --ignore-paths=src/api/third_party/"
+          strict: medium
