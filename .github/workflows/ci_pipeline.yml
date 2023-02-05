@@ -34,8 +34,4 @@ jobs:
           token: ${{ github.token }}
       - run: pip install -r requirements.txt
       - name: Python Linter
-        uses: sunnysid3up/python-linter@master
-        with:
-          source: "src/"
-          pylint-options: "--rcfile=.pylintrc --ignore-paths=src/api/third_party/"
-          strict: medium
+        run: python -m pylint src/ test/ --rcfile=.pylintrc --ignore-paths=src/api/third_party/
