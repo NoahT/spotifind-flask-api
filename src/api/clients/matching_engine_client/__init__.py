@@ -1,5 +1,7 @@
+""" Initialization for match service client package. """
 from .client_aggregator import ClientAggregator
 from .client import MockMatchServiceClient, MatchServiceClient
-import src.api.config as config
+from src.api.config import config
 
-match_client_aggregator = ClientAggregator(config.config, MockMatchServiceClient, MatchServiceClient)
+match_client_aggregator = ClientAggregator(config, MockMatchServiceClient,
+                                           MatchServiceClient)

@@ -1,23 +1,30 @@
+"""
+  Reco module. Contains relative URI(s) for getting recommendations
+  in resource state.
+"""
 import json
 import traceback
-import src.api.schemas as schemas
+from src.api import schemas
 import src.api.util.reco as reco_util
 from http import HTTPStatus
 from flask import Blueprint, request
 
 reco = Blueprint('reco', __name__)
 
-@reco.route('/<id>', methods=['GET'])
-def id(id):
-    response = None
-    size = request.args.get(key='size') or str(5)
 
-    try:
-        response = reco_util.v1_reco_controller.get_recos(id=id, size=size)
-    except Exception:
-        print(traceback.format_exc())
-        response = schemas.response_builder_factory.get_builder(status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(recos_response=None, id=id, size=size)
-    finally:
-        print(json.dumps(response.response))
+@reco.route('/<track_id>', methods=['GET'])
+def v1_reco_track_id(track_id: str):
+  response = None
+  size = request.args.get(key='size') or str(5)
 
-    return response.response, response.response_code
+  try:
+    response = reco_util.v1_reco_controller.get_recos(track_id, size)
+  except Exception:  # pylint: disable=broad-exception-caught
+    print(traceback.format_exc())
+    response = schemas.response_builder_factory.get_builder(
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR.value).build_response(
+            recos_response=None, track_id=track_id, size=size)
+  finally:
+    print(json.dumps(response.response))
+
+  return response.response, response.response_code
