@@ -10,7 +10,8 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
 
   @patch('src.api.util.env.environment_variable_proxy.EnvironmentVariableProxy')
   def setUp(self, environment_variable_proxy) -> None:
-    environment_variable_proxy.get_environment_variable.side_effect = lambda key: {
+    get_env = environment_variable_proxy.get_environment_variable
+    get_env.side_effect = lambda key: {
         'PROJECT_ID': '841506577075',
         'CLIENT_ID': '081f994d972f46519c1c8f9f6f11102a',
         'SECRET_ID': 'spotify-rest-api-secret',
