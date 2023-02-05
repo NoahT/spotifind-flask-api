@@ -26,6 +26,13 @@ jobs:
     needs: unit_tests
     steps:
       - uses: actions/checkout@v2  
+      - uses: actions/setup-python@v4
+        with:
+          python:version: '3.9'
+          cache: 'pip'
+          architecture: 'x64'
+          token: ${{ github.token }}
+      - run: pip install -r requirements.txt
       - name: Python Linter
         uses: sunnysid3up/python-linter@master
         with:
