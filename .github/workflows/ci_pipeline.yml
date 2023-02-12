@@ -20,6 +20,27 @@ jobs:
         # Could not find any documentation on mocking google cloud client libraries for unit tests. We mock credentials as an alternative.
         env:
           GOOGLE_APPLICATION_CREDENTIALS: test/unit_tests/mock_secret.json
+  code_coverage:
+    name: Unit test coverage
+    runs-on: ubuntu-latest
+    needs: unit_tests
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          cache: 'pip'
+          architecture: 'x64'
+          token: ${{ github.token }}
+      - run: pip install -r requirements.txt
+      - run: coverage run --source=src/api/ -m unittest discover test/unit_tests/
+      - run: coverage xml
+      - uses: orgoro/coverage@v3
+        with:
+          coverageFile: ./coverage.xml
+          token: ${{ github.token }}
+          thresholdAll: 0.8
+          thresholdNew: 0.8
   lint_check:
     name: Pylint check
     runs-on: ubuntu-latest
@@ -33,5 +54,4 @@ jobs:
           architecture: 'x64'
           token: ${{ github.token }}
       - run: pip install -r requirements.txt
-      - name: Python Linter
-        run: python -m pylint src/ test/ --rcfile=.pylintrc --ignore-paths=src/api/third_party/
+      - run: python -m pylint src/ test/ --rcfile=.pylintrc --ignore-paths=src/api/third_party/
