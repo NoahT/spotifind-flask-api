@@ -35,7 +35,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: coverage run --source=src/api/ -m unittest discover test/unit_tests/
       - run: coverage xml
-      - uses: ogoro/coverage@v3
+      - uses: orgoro/coverage@v3
         with:
           coverageFile: ./coverage.xml
           token: ${{ github.token }}
