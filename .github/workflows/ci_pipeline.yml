@@ -39,6 +39,8 @@ jobs:
         with:
           coverageFile: ./coverage.xml
           token: ${{ github.token }}
+          thresholdAll: 0.8
+          thresholdNew: 0.8
   lint_check:
     name: Pylint check
     runs-on: ubuntu-latest
