@@ -36,4 +36,5 @@ def load_blueprints(app: Flask) -> None:
 flask_app = Flask(__name__)
 flask_app.app_context().push()
 
+load_xff_proxy_configuration(flask_app)
 load_blueprints(flask_app)
