@@ -14,6 +14,13 @@ config = {
     'SPOTIFY_CLIENT_CONFIG': {
         'CONNECT_TIMEOUT': 0.500,
         'READ_TIMEOUT': 0.500
+    },
+    'PROXY_CONFIG': {
+        'ENABLED': False,
+        'LIMIT_X_FORWARDED_FOR': 1,
+        'LIMIT_X_FORWARDED_PROTO': 1,
+        'LIMIT_X_FORWARDED_HOST': 1,
+        'LIMIT_X_FORWARDED_PREFIX': 1
     }
 }
 
@@ -64,3 +71,16 @@ class ConfigFacadeTestSuite(unittest.TestCase):
     self.assertIsNotNone(spotify_client_config)
     self.assertEqual(0.500, spotify_client_config['CONNECT_TIMEOUT'])
     self.assertEqual(0.500, spotify_client_config['READ_TIMEOUT'])
+
+  @patch('src.api.util.env.env_util')
+  @patch('builtins.open', new_callable=mock_open, read_data=json.dumps(config))
+  def test_should_return_proxy_config(self, mock_file, env_util) -> None:
+    env_util.get_environment_variable.side_effect = env_util_side_effect
+    proxy_config = self.config_facade.get_proxy_config()
+
+    self.assertIsNotNone(proxy_config)
+    self.assertEqual(False, proxy_config['ENABLED'])
+    self.assertEqual(1, proxy_config['LIMIT_X_FORWARDED_FOR'])
+    self.assertEqual(1, proxy_config['LIMIT_X_FORWARDED_PROTO'])
+    self.assertEqual(1, proxy_config['LIMIT_X_FORWARDED_HOST'])
+    self.assertEqual(1, proxy_config['LIMIT_X_FORWARDED_PREFIX'])
