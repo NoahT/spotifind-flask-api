@@ -100,3 +100,11 @@ class SpotifyClientTestSuite(unittest.TestCase):
     self.assertRaises(exceptions.HTTPError,
                       self._spotify_client.v1_create_playlist, 'noahteshima',
                       token)
+
+  def test_should_raise_error_for_invalid_bearer_token_on_v1_playlist_tracks(
+      self) -> None:
+    pass
+
+  def test_should_raise_error_for_wrong_token_scope_on_v1_playlist_tracks(
+      self) -> None:
+    pass
