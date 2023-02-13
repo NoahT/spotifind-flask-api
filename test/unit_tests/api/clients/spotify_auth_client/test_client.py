@@ -2,6 +2,8 @@
 import unittest
 import requests
 import src.api.clients.spotify_auth_client.client as spotify_auth_client
+from google_crc32c import Checksum
+from google.cloud.secretmanager import SecretManagerServiceClient
 from unittest.mock import Mock, patch
 
 
@@ -28,18 +30,36 @@ class SpotifyAuthClientTestSuite(unittest.TestCase):
         config_facade)
     self._response = requests.Response()
 
-  def test_should_raise_error_for_4xx_response(self):
+  @patch('google_crc32c.Checksum')
+  @patch('google.cloud.secretmanager.SecretManagerServiceClient')
+  def test_should_raise_error_for_4xx_response(
+      self, secret_client: SecretManagerServiceClient, checksum: Checksum):
+    secret_client.secret_version_path.return_value = 'path'
+    version = Mock()
+    version.payload.data.decode.return_value = 'secret_version'
+    version.payload.data_crc32c.return_value = 1
+    checksum.return_value.hexdigest.return_value = f'{1:08x}'.encode('ascii')
+    secret_client.return_value.access_secret_version.return_value = version
+
     self._response.status_code = 400
     requests.post = Mock(return_value=self._response)
-    self._spotify_auth_client.get_basic_token = Mock(return_value='basic_token')
 
     self.assertRaises(requests.HTTPError,
                       self._spotify_auth_client.get_bearer_token)
 
-  def test_should_raise_error_for_5xx_response(self):
+  @patch('google_crc32c.Checksum')
+  @patch('google.cloud.secretmanager.SecretManagerServiceClient')
+  def test_should_raise_error_for_5xx_response(
+      self, secret_client: SecretManagerServiceClient, checksum: Checksum):
+    secret_client.secret_version_path.return_value = 'path'
+    version = Mock()
+    version.payload.data.decode.return_value = 'secret_version'
+    version.payload.data_crc32c.return_value = 1
+    checksum.return_value.hexdigest.return_value = f'{1:08x}'.encode('ascii')
+    secret_client.return_value.access_secret_version.return_value = version
+
     self._response.status_code = 500
     requests.post = Mock(return_value=self._response)
-    self._spotify_auth_client.get_basic_token = Mock(return_value='basic_token')
 
     self.assertRaises(requests.HTTPError,
                       self._spotify_auth_client.get_bearer_token)
