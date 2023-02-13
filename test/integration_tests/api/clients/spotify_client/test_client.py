@@ -103,8 +103,18 @@ class SpotifyClientTestSuite(unittest.TestCase):
 
   def test_should_raise_error_for_invalid_bearer_token_on_v1_playlist_tracks(
       self) -> None:
-    pass
+    self.assertRaises(exceptions.HTTPError,
+                      self._spotify_client.v1_playlist_tracks,
+                      '1Wy3exSZouKDmDGQYIDuHT',
+                      {'uris': ['spotify:track:62xX1yYJ283Qni51S4SP5d']},
+                      'invalid_token')
 
   def test_should_raise_error_for_wrong_token_scope_on_v1_playlist_tracks(
       self) -> None:
-    pass
+    # public, read-only scope - will cause 403 due to insufficient permission
+    token = self._auth_client.get_bearer_token()
+    token = f'Bearer {token}'
+    self.assertRaises(exceptions.HTTPError,
+                      self._spotify_client.v1_playlist_tracks,
+                      '1Wy3exSZouKDmDGQYIDuHT',
+                      {'uris': ['spotify:track:62xX1yYJ283Qni51S4SP5d']}, token)
