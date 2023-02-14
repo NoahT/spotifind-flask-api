@@ -1,4 +1,7 @@
 {
     "ENVIRONMENT": "development",
-    "MATCH_SERVICE_ENABLED": false
+    "MATCH_SERVICE_ENABLED": false,
+    "PROXY_CONFIG": {
+        "ENABLED": false
+    }
 }

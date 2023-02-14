@@ -34,11 +34,14 @@ class ConfigFacade():
   def is_match_service_enabled(self) -> bool:
     return self.config['MATCH_SERVICE_ENABLED'] or False
 
-  def get_spotify_auth_client_config(self) -> bool:
+  def get_spotify_auth_client_config(self) -> dict:
     return self.config['SPOTIFY_AUTH_CLIENT_CONFIG'] or {}
 
-  def get_spotify_client_config(self) -> bool:
+  def get_spotify_client_config(self) -> dict:
     return self.config['SPOTIFY_CLIENT_CONFIG'] or {}
+
+  def get_proxy_config(self) -> dict:
+    return self.config['PROXY_CONFIG'] or {}
 
   @property
   def config(self) -> dict:
