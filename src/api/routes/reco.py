@@ -14,7 +14,6 @@ reco = Blueprint('reco', __name__)
 
 @reco.route('/<track_id>', methods=['GET'])
 def v1_reco_track_id(track_id: str):
-  print(request.headers)
   response = None
   size = request.args.get(key='size') or str(5)
 

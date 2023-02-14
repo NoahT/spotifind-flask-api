@@ -14,7 +14,6 @@ playlist = Blueprint('playlist', __name__)
 
 @playlist.route('/<user_id>/<track_id>', methods=['POST'])
 def v1_playlist_user_id_track_id(user_id: str, track_id: str):
-  print(request.headers)
   size = request.args.get(key='size') or str(5)
   user_token = request.headers['Authorization']
 
