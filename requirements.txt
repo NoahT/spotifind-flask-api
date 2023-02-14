@@ -27,6 +27,7 @@ grpc-google-iam-v1==0.12.4
 grpcio==1.47.0
 grpcio-status==1.47.0
 grpcio-tools==1.47.0
+gunicorn==20.1.0
 idna==3.3
 importlib-metadata==4.12.0
 isort==5.12.0
