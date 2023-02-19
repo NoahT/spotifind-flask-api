@@ -63,7 +63,7 @@ spec:
         - name: SECRET_VERSION_ID
           value: "latest"
         - name: ENVIRONMENT
-          value: "development"
+          value: "staging"
         - name: FLASK_APP
           value: "/app/src/api/app"
       # Sidecar container for warmups. We take this example directly from the expedia group documentation
