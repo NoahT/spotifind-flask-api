@@ -26,7 +26,7 @@ class PlaylistResourceTestSuite(unittest.TestCase):
         'status': 401
     }
     headers = Headers()
-    headers.add('Authorization', 'Invalid token')
+    headers.add('Authorization', 'Bearer invalid_token')
 
     response = self._spotifind_client.post(self._uri, headers=headers)
     response_json = response.json
