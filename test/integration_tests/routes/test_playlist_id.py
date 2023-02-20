@@ -10,7 +10,7 @@ class PlaylistResourceTestSuite(unittest.TestCase):
   def setUp(self) -> None:
     self._spotifind_client = flask_app.test_client()
     self._spotify_auth_client = spotify_auth_client
-    self._user_id = 'nteshima'
+    self._user_id = 'noahteshima'
     self._track_id = '6AUlMVr80H8KGVTGeJlpbp'
     self._uri = f'/v1/playlist/{self._user_id}/{self._track_id}'
 
