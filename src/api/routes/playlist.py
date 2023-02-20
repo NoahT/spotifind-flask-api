@@ -34,7 +34,7 @@ def v1_playlist_user_id_track_id(user_id: str, track_id: str):
     print(json.dumps(response.response))
     print(response.response_code)
 
-  flask_response = Response(response=response.response,
+  flask_response = Response(response=json.dumps(response.response),
                             status=response.response_code,
                             headers=response.response_headers,
                             content_type='application/json')
