@@ -17,9 +17,14 @@ def v1_playlist_user_id_track_id(user_id: str, track_id: str):
   response = None
   try:
     size = request.args.get(key='size') or str(5)
-    user_token = request.headers['Authorization']
-    response = reco_util.v1_reco_controller.create_playlist(
-        user_id=user_id, track_id=track_id, user_token=user_token, size=size)
+    if not 'Authorization' in request.headers:
+      response = schemas.response_builder_factory.get_builder(
+          status_code=HTTPStatus.BAD_REQUEST.value).build_response(
+              recos_response=None, track_id=track_id, size=size)
+    else:
+      user_token = request.headers['Authorization']
+      response = reco_util.v1_reco_controller.create_playlist(
+          user_id=user_id, track_id=track_id, user_token=user_token, size=size)
   except Exception:  # pylint: disable=broad-exception-caught
     print(traceback.format_exc())
     response = schemas.response_builder_factory.get_builder(
