@@ -20,16 +20,28 @@ class PlaylistResourceTestSuite(unittest.TestCase):
     self.assertEqual(400, response.status_code)
 
   def test_should_return_401_for_invalid_authorization_header(self) -> None:
+    response_401 = {
+        'message': 'Valid authentication credentials not provided.',
+        'status': 401
+    }
     headers = {'Authorization': 'Invalid token'}
 
     response = self._spotifind_client.post(self._uri, headers=headers)
+    response_json = response.json
 
-    self.assertEqual(401, response.status_code)
+    self.assertIsNotNone(response_json)
+    self.assertEqual(response_401, response_json)
 
   def test_should_return_403_for_insufficient_authorization_scope(self) -> None:
+    response_403 = {
+        'message': 'Insufficient authentication credentials.',
+        'status': 403
+    }
     token_bearer = self._spotify_auth_client.get_bearer_token()
     headers = {'Authorization': f'Bearer {token_bearer}'}
 
     response = self._spotifind_client.post(self._uri, headers=headers)
+    response_json = response.json
 
-    self.assertEqual(403, response.status_code)
+    self.assertIsNotNone(response_json)
+    self.assertEqual(response_403, response_json)
