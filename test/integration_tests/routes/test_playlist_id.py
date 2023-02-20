@@ -24,7 +24,7 @@ class PlaylistResourceTestSuite(unittest.TestCase):
         'message': 'Valid authentication credentials not provided.',
         'status': 401
     }
-    headers = {'Authorization': 'Invalid token'}
+    headers = [('Authorization', 'Invalid token')]
 
     response = self._spotifind_client.post(self._uri, headers=headers)
     response_json = response.json
@@ -38,7 +38,7 @@ class PlaylistResourceTestSuite(unittest.TestCase):
         'status': 403
     }
     token_bearer = self._spotify_auth_client.get_bearer_token()
-    headers = {'Authorization': f'Bearer {token_bearer}'}
+    headers = [('Authorization', f'Bearer {token_bearer}')]
 
     response = self._spotifind_client.post(self._uri, headers=headers)
     response_json = response.json
