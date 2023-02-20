@@ -6,7 +6,10 @@ from werkzeug.datastructures import Headers
 
 
 class PlaylistResourceTestSuite(unittest.TestCase):
-  """ Integration test suite for POST::v1/{user_id}/{track_id} API. """
+  """
+  Integration test suite for POST::v1/{user_id}/{track_id} API.
+  Due to the scope of authorization needed for the 201 use case, we only test the 4xx use cases here.
+  """
 
   def setUp(self) -> None:
     self._spotifind_client = flask_app.test_client()
@@ -16,8 +19,13 @@ class PlaylistResourceTestSuite(unittest.TestCase):
     self._uri = f'/v1/playlist/{self._user_id}/{self._track_id}'
 
   def test_should_return_400_for_invalid_size(self) -> None:
-    response = self._spotifind_client.post(f'{self._uri}?size=0')
+    response_400 = {'message': 'Bad request.', 'status': 400}
 
+    response = self._spotifind_client.post(f'{self._uri}?size=0')
+    response_json = response.json
+
+    self.assertIsNotNone(response_json)
+    self.assertEqual(response_400, response_json)
     self.assertEqual(400, response.status_code)
 
   def test_should_return_401_for_invalid_authorization_header(self) -> None:
@@ -33,6 +41,7 @@ class PlaylistResourceTestSuite(unittest.TestCase):
 
     self.assertIsNotNone(response_json)
     self.assertEqual(response_401, response_json)
+    self.assertEqual(401, response.status_code)
 
   def test_should_return_403_for_insufficient_authorization_scope(self) -> None:
     response_403 = {
@@ -49,3 +58,4 @@ class PlaylistResourceTestSuite(unittest.TestCase):
 
     self.assertIsNotNone(response_json)
     self.assertEqual(response_403, response_json)
+    self.assertEqual(403, response.status_code)
