@@ -14,13 +14,17 @@ playlist = Blueprint('playlist', __name__)
 
 @playlist.route('/<user_id>/<track_id>', methods=['POST'])
 def v1_playlist_user_id_track_id(user_id: str, track_id: str):
-  size = request.args.get(key='size') or str(5)
-  user_token = request.headers['Authorization']
-
   response = None
   try:
-    response = reco_util.v1_reco_controller.create_playlist(
-        user_id=user_id, track_id=track_id, user_token=user_token, size=size)
+    size = request.args.get(key='size') or str(5)
+    if not 'Authorization' in request.headers:
+      response = schemas.response_builder_factory.get_builder(
+          status_code=HTTPStatus.BAD_REQUEST.value).build_response(
+              recos_response=None, track_id=track_id, size=size)
+    else:
+      user_token = request.headers['Authorization']
+      response = reco_util.v1_reco_controller.create_playlist(
+          user_id=user_id, track_id=track_id, user_token=user_token, size=size)
   except Exception:  # pylint: disable=broad-exception-caught
     print(traceback.format_exc())
     response = schemas.response_builder_factory.get_builder(
@@ -30,8 +34,9 @@ def v1_playlist_user_id_track_id(user_id: str, track_id: str):
     print(json.dumps(response.response))
     print(response.response_code)
 
-  flask_response = Response(response=response.response,
+  flask_response = Response(response=json.dumps(response.response),
                             status=response.response_code,
-                            headers=response.response_headers)
+                            headers=response.response_headers,
+                            content_type='application/json')
 
   return flask_response
