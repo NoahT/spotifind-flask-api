@@ -7,8 +7,9 @@ from werkzeug.datastructures import Headers
 
 class PlaylistResourceTestSuite(unittest.TestCase):
   """
-  Integration test suite for POST::v1/{user_id}/{track_id} API.
-  Due to the scope of authorization needed for the 201 use case, we only test the 4xx use cases here.
+    Integration test suite for POST::v1/{user_id}/{track_id} API.
+    Due to the scope of authorization needed for the 201 use case,
+    we only test the 4xx use cases here.
   """
 
   def setUp(self) -> None:
