@@ -3,22 +3,24 @@ We are primarily interested in briefly documenting business and engineering requ
 
 ## Component Level Design
 ### GET::/v1/reco/{id*}
-| Resource  | Description | Type | Path parameters | Query parameters |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5
+| Resource       | Description                                                      | Type | Path parameters                                               | Query parameters                                                                                                                                                                                                                                           |
+| -------------- | ---------------------------------------------------------------- | ---- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| /v1/reco/{id*} | Retrieve Spotify tracks to recommend based on the given track id | GET  | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5                                                                                                                                                                                             |
+|                |                                                                  |      |                                                               | **verbose** - Boolean valued query parameter indicating whether verbose response should be returned for each Spotify track ID. When true, the output for Spotify's `GET::/v1/tracks/{id*}` API is added to each recommended track ID. Default value false. |
+
 
 #### HTTP response status codes
-| Status code | Description |
-| ------------- | ------------- |
-| 200  | When track id recommendations are returned successfully |
-| 400  | Miscellaneous client failure |
-| 404  | Client failure due to invalid track id |
-| 500  | Miscellaneous service failure |
+| Status code | Description                                             |
+| ----------- | ------------------------------------------------------- |
+| 200         | When track id recommendations are returned successfully |
+| 400         | Miscellaneous client failure                            |
+| 404         | Client failure due to invalid track id                  |
+| 500         | Miscellaneous service failure                           |
 
 #### Response headers
-| Request header | Value(s) |
-| ------------- | ------------- |
-| Content-Type  | application/json |
+| Request header | Value(s)         |
+| -------------- | ---------------- |
+| Content-Type   | application/json |
 
 #### Sample requests
 **Request**
@@ -99,29 +101,29 @@ HTTPS/1.1 404 NOT FOUND
 ```
 
 ### POST::/v1/playlist/{user_id*}/{track_id*}
-| Resource  | Description | Type | Path parameters | Query parameters |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| /v1/playlist/{id*}  | Create Spotify playlist with recommended tracks based on the given track id | POST | **user_id** - Spotify user ID to generate the playlist for (i.e. noahteshima) <br> **track_id** - Spotify track ID to use when generating playlist | **size** - Size of the playlist to generate. Default size 5
+| Resource           | Description                                                                 | Type | Path parameters                                                                                                                                    | Query parameters                                            |
+| ------------------ | --------------------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| /v1/playlist/{id*} | Create Spotify playlist with recommended tracks based on the given track id | POST | **user_id** - Spotify user ID to generate the playlist for (i.e. noahteshima) <br> **track_id** - Spotify track ID to use when generating playlist | **size** - Size of the playlist to generate. Default size 5 |
 
 #### HTTP response status codes
-| Status code | Description |
-| ------------- | ------------- |
-| 201  | When Spotify playlist is created successfully |
-| 400  | Miscellaneous client failure |
-| 401  | Client failure due to missing `Authorization` header |
-| 403  | Client failure due to insufficient scopes in `Authorization` header |
-| 404  | Client failure due to invalid track id |
-| 500  | Miscellaneous service failure |
+| Status code | Description                                                         |
+| ----------- | ------------------------------------------------------------------- |
+| 201         | When Spotify playlist is created successfully                       |
+| 400         | Miscellaneous client failure                                        |
+| 401         | Client failure due to missing `Authorization` header                |
+| 403         | Client failure due to insufficient scopes in `Authorization` header |
+| 404         | Client failure due to invalid track id                              |
+| 500         | Miscellaneous service failure                                       |
 
 #### Request headers
-| Request header | Value(s) |
-| ------------- | ------------- |
+| Request header | Value(s)                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Authorization  | Bearer {token}, where `token` is a Bearer token from [Spotify](https://developer.spotify.com/documentation/general/guides/authorization/scopes/) with [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public), [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes |
 
 #### Response headers
-| Response header | Value(s) |
-| ------------- | ------------- |
-| Location  | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
+| Response header | Value(s)                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| Location        | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
 
 #### Sample requests
 **Request**
