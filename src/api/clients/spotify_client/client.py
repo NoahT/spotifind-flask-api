@@ -16,6 +16,10 @@ class Client(ABC):
     pass
 
   @abstractmethod
+  def v1_tracks_bulk(self, track_ids: list, marketplace: str) -> dict:
+    pass
+
+  @abstractmethod
   def v1_audio_features(self, track_id: str) -> dict:
     pass
 
@@ -42,6 +46,7 @@ class SpotifyClient(Client):
                logging_client: LoggingClient, config_facade: ConfigFacade):
     self._hostname = 'https://api.spotify.com'
     self._v1_tracks_path = '/v1/tracks/'
+    self._v1_tracks_bulk_path = '/v1/tracks'
     self._v1_audio_features_path = '/v1/audio-features/'
     self._v1_create_playlist_path = '/v1/users/{}/playlists'
     self._v1_playlist_tracks_path = '/v1/playlists/{}/tracks'
@@ -70,6 +75,39 @@ class SpotifyClient(Client):
     headers = {'Authorization': bearer_token}
 
     response = requests.get(url, headers=headers, timeout=self.get_timeouts())
+    batch.log(f'status={response.status_code}', severity='NOTICE')
+    response.raise_for_status()
+    response_json = response.json()
+    batch.log(f'response={response_json}', severity='INFO')
+    batch.commit()
+
+    return response_json
+
+  def v1_tracks_bulk(self, track_ids: list, **kwargs) -> dict:
+    batch = self.logger.batch()
+
+    batch.log(f'Making GET call to {self._v1_tracks_bulk_path}',
+              severity='INFO')
+
+    track_ids_string = ','.join(track_ids)
+    batch.log(f'track_ids={track_ids_string}', severity='INFO')
+    url = f'{self._hostname}{self._v1_tracks_bulk_path}?ids={track_ids_string}'
+
+    marketplace = kwargs.get('marketplace')
+
+    if marketplace:
+      batch.log(f'marketplace={marketplace}', severity='INFO')
+      url = f'{url}?market={marketplace}'
+    else:
+      batch.log('marketplace query param omitted.', severity='INFO')
+
+    bearer_token = self.get_bearer_token()
+
+    headers = {'Authorization': bearer_token}
+
+    response = requests.get(url=url,
+                            headers=headers,
+                            timeout=self.get_timeouts())
     batch.log(f'status={response.status_code}', severity='NOTICE')
     response.raise_for_status()
     response_json = response.json()
