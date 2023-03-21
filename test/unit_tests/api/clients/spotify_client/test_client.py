@@ -44,6 +44,32 @@ class SpotifyClientTestSuite(unittest.TestCase):
 
     self.assertEqual({}, response)
 
+  def test_should_raise_error_for_4xx_response_on_v1_tracks_bulk(self):
+    self._response.status_code = 400
+    requests.get = Mock(return_value=self._response)
+    self._spotify_client.get_bearer_token = Mock(return_value='Bearer token')
+
+    self.assertRaises(requests.HTTPError, self._spotify_client.v1_tracks_bulk,
+                      ['id_1', 'id_2'])
+
+  def test_should_raise_error_for_5xx_response_on_v1_tracks_bulk(self):
+    self._response.status_code = 500
+    requests.get = Mock(return_value=self._response)
+    self._spotify_client.get_bearer_token = Mock(return_value='Bearer token')
+
+    self.assertRaises(requests.HTTPError, self._spotify_client.v1_tracks_bulk,
+                      ['id_1', 'id_2'])
+
+  def test_should_return_json_for_2xx_response_on_v1_tracks_bulk(self):
+    self._response.status_code = 200
+    requests.get = Mock(return_value=self._response)
+    requests.Response.json = Mock(return_value={})
+    self._spotify_client.get_bearer_token = Mock(return_value='Bearer token')
+
+    response = self._spotify_client.v1_tracks_bulk(['id_1', 'id_2'])
+
+    self.assertEqual({}, response)
+
   def test_should_raise_error_for_4xx_response_on_v1_audio_features(self):
     self._response.status_code = 400
     requests.get = Mock(return_value=self._response)
