@@ -56,6 +56,26 @@ class SpotifyClientTestSuite(unittest.TestCase):
     self.assertRaises(exceptions.HTTPError, self._spotify_client.v1_tracks,
                       '62BGM9bNkNcvOh13B4wOyr')
 
+  def test_should_return_response_for_single_valid_track_id_on_v1_tracks_bulk(
+      self) -> None:
+    pass
+
+  def test_should_return_response_for_multiple_valid_track_id_on_v1_tracks_bulk(
+      self) -> None:
+    pass
+
+  def test_should_raise_error_for_invalid_bearer_token_on_v1_tracks_bulk(
+      self) -> None:
+    pass
+
+  def test_should_return_null_for_invalid_track_ids_on_v1_tracks_bulk(
+      self) -> None:
+    pass
+
+  def test_should_raise_error_for_missing_track_ids_param_on_v1_tracks_bulk(
+      self) -> None:
+    pass
+
   def test_should_return_response_for_valid_track_id_on_v1_audio_features(
       self) -> None:
     response = self._spotify_client.v1_audio_features('62BGM9bNkNcvOh13B4wOyr')
