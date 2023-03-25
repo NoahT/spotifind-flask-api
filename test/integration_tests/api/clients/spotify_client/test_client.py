@@ -58,23 +58,65 @@ class SpotifyClientTestSuite(unittest.TestCase):
 
   def test_should_return_response_for_single_valid_track_id_on_v1_tracks_bulk(
       self) -> None:
-    pass
+    track_ids = ['7vQzm9id9OADh4tigOfaHo']
+    response = self._spotify_client.v1_tracks_bulk(track_ids=track_ids)
+
+    self.assertIsNotNone(response)
+
+    response_tracks = response['tracks']
+    self.assertEqual(1, len(response_tracks))
+
+    response_track1 = response_tracks[0]
+    self.assertIsNotNone(response_track1)
+    self.assertEqual('7vQzm9id9OADh4tigOfaHo', response_track1['id'])
 
   def test_should_return_response_for_multiple_valid_track_id_on_v1_tracks_bulk(
       self) -> None:
-    pass
+    track_ids = ['7vQzm9id9OADh4tigOfaHo', '0u9B86E4rLW88UXn6FPMyu']
+    response = self._spotify_client.v1_tracks_bulk(track_ids=track_ids)
+
+    self.assertIsNotNone(response)
+
+    response_tracks = response['tracks']
+    self.assertEqual(2, len(response_tracks))
+
+    response_track1 = response_tracks[0]
+    self.assertIsNotNone(response_track1)
+    self.assertEqual('7vQzm9id9OADh4tigOfaHo', response_track1['id'])
+
+    response_track2 = response_tracks[1]
+    self.assertIsNotNone(response_track2)
+    self.assertEqual('0u9B86E4rLW88UXn6FPMyu', response_track2['id'])
 
   def test_should_raise_error_for_invalid_bearer_token_on_v1_tracks_bulk(
       self) -> None:
-    pass
+    self._spotify_client.get_bearer_token = Mock(
+        return_value='Bearer invalid_token')
+    track_ids = ['7vQzm9id9OADh4tigOfaHo']
+
+    self.assertRaises(exceptions.HTTPError, self._spotify_client.v1_tracks_bulk,
+                      track_ids)
 
   def test_should_return_null_for_invalid_track_ids_on_v1_tracks_bulk(
       self) -> None:
-    pass
+    track_ids = ['invalidTrackId']
+
+    response = self._spotify_client.v1_tracks_bulk(track_ids=track_ids)
+
+    self.assertIsNotNone(response)
+
+    response_tracks = response['tracks']
+    self.assertEqual(1, len(response_tracks))
+
+    response_track1 = response_tracks[0]
+    self.assertIsNone(response_track1)
 
   def test_should_raise_error_for_missing_track_ids_param_on_v1_tracks_bulk(
       self) -> None:
-    pass
+    track_ids = []
+
+    self.assertRaises(exceptions.HTTPError, self._spotify_client.v1_tracks_bulk,
+                      track_ids)
 
   def test_should_return_response_for_valid_track_id_on_v1_audio_features(
       self) -> None:
