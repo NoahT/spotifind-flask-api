@@ -15,4 +15,4 @@ ENV SECRET_ID="spotify-rest-api-secret"
 ENV SECRET_VERSION_ID="latest"
 ENV ENVIRONMENT="staging"
 
-CMD [ "python3", "-m", "unittest", "discover", "-s", "./test/integration_tests/" ]
+CMD [ "python3", "-m", "unittest", "discover", "-s", "./test/integration_tests/", "--verbose" ]
