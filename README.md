@@ -67,17 +67,17 @@ Spotifind API is exposed behind two endpoints. Note that HTTPS is the required p
 #### GET::/v1/reco/{id*}
 Get recommendations for Spotify track URIs based on an input track URI.
 
-| Resource  | Description | Type | Path parameters | Query parameters |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| /v1/reco/{id*}  | Retrieve Spotify tracks to recommend based on the given track id | GET | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5
+| Resource       | Description                                                      | Type | Path parameters                                               | Query parameters                                               |
+| -------------- | ---------------------------------------------------------------- | ---- | ------------------------------------------------------------- | -------------------------------------------------------------- |
+| /v1/reco/{id*} | Retrieve Spotify tracks to recommend based on the given track id | GET  | **id** - Spotify Track ID to use when getting recommendations | **size** - Number of recommendations to return. Default size 5 |
 
 ##### HTTP response status codes
-| Status code | Description |
-| ------------- | ------------- |
-| 200  | When track id recommendations are returned successfully |
-| 400  | Miscellaneous client failure |
-| 404  | Client failure due to invalid track id |
-| 500  | Miscellaneous service failure |
+| Status code | Description                                             |
+| ----------- | ------------------------------------------------------- |
+| 200         | When track id recommendations are returned successfully |
+| 400         | Miscellaneous client failure                            |
+| 404         | Client failure due to invalid track id                  |
+| 500         | Miscellaneous service failure                           |
 
 ##### Example Usage
 **Request**
@@ -160,29 +160,29 @@ HTTPS/1.1 404 NOT FOUND
 #### POST::/v1/playlist/{user_id*}/{track_id*}
 Create a Spotify playlist containing recommended Spotify track URIs based on an input track URI for a target user.
 
-| Resource  | Description | Type | Path parameters | Query parameters |
-| ------------- | ------------- | ------------- | ------------- | ------------- |
-| /v1/playlist/{id*}  | Create Spotify playlist with recommended tracks based on the given track id | POST | **user_id** - Spotify user ID to generate the playlist for (i.e. noahteshima) <br> **track_id** - Spotify track ID to use when generating playlist | **size** - Size of the playlist to generate. Default size 5
+| Resource           | Description                                                                 | Type | Path parameters                                                                                                                                    | Query parameters                                            |
+| ------------------ | --------------------------------------------------------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| /v1/playlist/{id*} | Create Spotify playlist with recommended tracks based on the given track id | POST | **user_id** - Spotify user ID to generate the playlist for (i.e. noahteshima) <br> **track_id** - Spotify track ID to use when generating playlist | **size** - Size of the playlist to generate. Default size 5 |
 
 ##### HTTP response status codes
-| Status code | Description |
-| ------------- | ------------- |
-| 201  | When Spotify playlist is created successfully |
-| 400  | Miscellaneous client failure |
-| 401  | Client failure due to missing `Authorization` header |
-| 403  | Client failure due to insufficient scopes in `Authorization` header |
-| 404  | Client failure due to invalid track id |
-| 500  | Miscellaneous service failure |
+| Status code | Description                                                         |
+| ----------- | ------------------------------------------------------------------- |
+| 201         | When Spotify playlist is created successfully                       |
+| 400         | Miscellaneous client failure                                        |
+| 401         | Client failure due to missing `Authorization` header                |
+| 403         | Client failure due to insufficient scopes in `Authorization` header |
+| 404         | Client failure due to invalid track id                              |
+| 500         | Miscellaneous service failure                                       |
 
 ##### Request headers
-| Request header | Value(s) |
-| ------------- | ------------- |
+| Request header | Value(s)                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Authorization  | Bearer {token}, where `token` is a Bearer token from [Spotify](https://developer.spotify.com/documentation/general/guides/authorization/scopes/) with [playlist-modify-public](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-public), [playlist-modify-private](https://developer.spotify.com/documentation/general/guides/authorization/scopes/#playlist-modify-private) scopes |
 
 ##### Response headers
-| Response header | Value(s) |
-| ------------- | ------------- |
-| Location  | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
+| Response header | Value(s)                                                                                              |
+| --------------- | ----------------------------------------------------------------------------------------------------- |
+| Location        | https://api.spotify.com/v1/playlists/{playlist_id}, where `playlist_id` is the newly created playlist |
 
 ##### Example Usage
 **Request**
@@ -338,5 +338,16 @@ python -m unittest discover test/unit_tests/
 #### Integration testing
 
 Integration tests currently run on the CD, but it is suggested to run integrations tests prior to this to avoid having to revert breaking changes. Since the ANN index service is currently deployed behind a Virtual Private Cloud, all integration tests currently need to be run on a cluster in Google Cloud. To run integration tests, a Kubernetes cluster on [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine) can be provisioned. From Google Cloud Build, the *GKE-Continuous-Deployment* pipeline can be copied and changed to run on a separate branch. After making these changes, commits added to the remote (this) repository will trigger a new CD pipeline run in Google Cloud.
+
+Most integration test suites can still be run locally (excluding those that include gRPC calls to matching service). This can sometimes be useful to avoid having to "debug on the CI/CD" or to reduce the feedback loop for properly testing changes. In order to run integration tests locally, the following changes should be done:
+1. This service uses [google-auth](https://google-auth.readthedocs.io/en/master/user-guide.html) to authenticate into services on Google Cloud. On your local environment, first create [default application credentials](https://cloud.google.com/docs/authentication/application-default-credentials) for development. It is recommended to create these application credentials by submitting your [user credentials](https://cloud.google.com/docs/authentication/application-default-credentials#personal) with gcloud and exporting the location of these locations with an environment variable. For these steps, we exported the location of the default application credentials to an environment variable `GOOGLE_APPLICATION_CREDENTIALS`
+2. Once these credentials are available in your local environment, run the following docker command from the base directory of this project to create a Dockerfile for running integration tests:
+```
+docker build -t integration-tests:latest -f ./tests/integration_tests/Dockerfile .
+```
+3. Once the image for running integration tests is built, mount your application credentials when running the image with the following command:
+```
+docker run -v $GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/credentials.json:ro -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/credentials.json integration-tests:latest
+```
 
 
