@@ -127,15 +127,25 @@ class OkResponseBuilder(ResponseBuilder):
   def __init__(self) -> None:
     self._response_code = HTTPStatus.OK.value
 
-  def build_response(self, recos_response: list, track_id: str, size: int,
+  def build_response(self,
+                     recos_response: list,
+                     track_id: str,
+                     size: int,
+                     verbose: bool = False,
                      **kwargs: dict) -> Response:
     print(recos_response)
     response = {'request': {'track': {'id': track_id}, 'size': size}}
     recos = []
-    neighbors = [{'id': match_neighbor.id} for match_neighbor in recos_response]
+    neighbors = recos_response
+
+    if verbose is False:
+      neighbors = [{
+          'id': match_neighbor.id
+      } for match_neighbor in recos_response]
+
     for reco in neighbors:
       if track_id != reco['id']:
-        recos.append({'id': reco['id']})
+        recos.append(reco)
 
     response['recos'] = recos[:size]
 

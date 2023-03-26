@@ -12,9 +12,15 @@ from src.api.schemas.response import Response, ResponseBuilderFactory
 
 
 class RecoAdapter(ABC):
+  """
+    Adapter class stubs for API response and downstream match service response.
+  """
 
   @abstractmethod
-  def get_recos(self, track_id: str, size: int) -> Response:
+  def get_recos(self,
+                track_id: str,
+                size: int,
+                verbose: bool = False) -> Response:
     pass
 
   @abstractmethod
@@ -24,7 +30,7 @@ class RecoAdapter(ABC):
 
 
 class V1RecoAdapter(RecoAdapter):
-  """ Adapter class for API response and downstream match service response. """
+  """ Adapter class implementation for API response and downstream match service response. """
 
   def __init__(self, spotify_client: SpotifyClient,
                client_aggregator: ClientAggregator,
@@ -40,7 +46,10 @@ class V1RecoAdapter(RecoAdapter):
         'acousticness', 'instrumentalness', 'liveness', 'valence'
     ]
 
-  def get_recos(self, track_id: str, size: str) -> Response:
+  def get_recos(self,
+                track_id: str,
+                size: str,
+                verbose: bool = False) -> Response:
     self.validate_reco_size(size)
     size = int(size)
 
@@ -50,10 +59,21 @@ class V1RecoAdapter(RecoAdapter):
         'query': track_embedding,
         'num_recos': (size + 1)
     })
+
+    recos_response = recos[0]
+
+    if verbose is True:
+      track_ids = [match_neighbor.id for match_neighbor in recos_response]
+      v1_tracks_bulk_response = self.spotify_client.v1_tracks_bulk(
+          track_ids=track_ids)
+      recos_response = v1_tracks_bulk_response['tracks']
+
     recos_response = self.response_builder_factory.get_builder(
-        status_code=HTTPStatus.OK.value).build_response(recos_response=recos[0],
-                                                        track_id=track_id,
-                                                        size=int(size))
+        status_code=HTTPStatus.OK.value).build_response(
+            recos_response=recos_response,
+            track_id=track_id,
+            size=int(size),
+            verbose=verbose)
 
     return recos_response
 

@@ -29,10 +29,13 @@ class V1RecoController(RecoController):
     self._reco_adapter = reco_adapter
     self._response_builder_factory = response_builder_factory
 
-  def get_recos(self, track_id: str, size: int) -> response.Response:
+  def get_recos(self,
+                track_id: str,
+                size: int,
+                verbose: bool = False) -> response.Response:
     recos_response = None
     try:
-      recos_response = self._reco_adapter.get_recos(track_id, size)
+      recos_response = self._reco_adapter.get_recos(track_id, size, verbose)
     except HTTPError as http_error:
       print(traceback.format_exc())
 
