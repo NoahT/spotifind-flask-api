@@ -30,7 +30,10 @@ class RecoAdapter(ABC):
 
 
 class V1RecoAdapter(RecoAdapter):
-  """ Adapter class implementation for API response and downstream match service response. """
+  """
+    Adapter class implementation for API response and downstream match service
+    response.
+  """
 
   def __init__(self, spotify_client: SpotifyClient,
                client_aggregator: ClientAggregator,
