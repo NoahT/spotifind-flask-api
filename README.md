@@ -341,7 +341,7 @@ Integration tests currently run on the CD, but it is suggested to run integratio
 
 Most integration test suites can still be run locally (excluding those that include gRPC calls to matching service). This can sometimes be useful to avoid having to "debug on the CI/CD" or to reduce the feedback loop for properly testing changes. In order to run integration tests locally, the following changes should be done:
 1. This service uses [google-auth](https://google-auth.readthedocs.io/en/master/user-guide.html) to authenticate into services on Google Cloud. On your local environment, first create [default application credentials](https://cloud.google.com/docs/authentication/application-default-credentials) for development. It is recommended to create these application credentials by submitting your [user credentials](https://cloud.google.com/docs/authentication/application-default-credentials#personal) with gcloud and exporting the location of these locations with an environment variable. For these steps, we exported the location of the default application credentials to an environment variable `GOOGLE_APPLICATION_CREDENTIALS`
-2. Once these credentials are available in your local environment, run the following docker command from the base directory of this project to create a Dockerfile for running integration tests:
+2. Once these credentials are available in your local environment, run the following docker command from the base directory of this project to create a Docker image for running integration tests:
 ```
 docker build -t integration-tests:latest -f ./tests/integration_tests/Dockerfile .
 ```
