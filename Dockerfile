@@ -7,5 +7,5 @@ COPY src/api/ src/api/
 
 RUN pip3 install -r requirements.txt
 
-CMD ["gunicorn", "--workers=1", "src.api.app:flask_app", "--bind=0.0.0.0:5000"]
+CMD ["gunicorn", "--workers=1", "src.api.app:flask_app", "--bind=0.0.0.0:5000", "--timeout=150"]
 
