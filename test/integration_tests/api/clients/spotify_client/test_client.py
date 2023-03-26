@@ -118,14 +118,17 @@ class SpotifyClientTestSuite(unittest.TestCase):
     self.assertRaises(exceptions.HTTPError, self._spotify_client.v1_tracks_bulk,
                       track_ids)
 
-  def test_should_raise_error_for_too_many_track_ids_on_v1_tracks_bulk(
+  def test_should_return_response_for_too_many_track_ids_on_v1_tracks_bulk(
       self) -> None:
     # Threshold for bulk API call quantity is 50 track IDs. 51 track IDs or more
-    # should yield a 4xx response.
+    # should yield a 4xx response. As a part of our implementation, we make
+    # multiple bulk API calls in this case so a 4xx does not occur.
     track_ids = ['7vQzm9id9OADh4tigOfaHo'] * 51
 
-    self.assertRaises(exceptions.HTTPError, self._spotify_client.v1_tracks_bulk,
-                      track_ids)
+    response = self._spotify_client.v1_tracks_bulk(track_ids=track_ids)
+
+    response_tracks = response['tracks']
+    self.assertEqual(51, len(response_tracks))
 
   def test_should_return_response_for_valid_track_id_on_v1_audio_features(
       self) -> None:

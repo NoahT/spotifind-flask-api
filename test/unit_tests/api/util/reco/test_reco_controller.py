@@ -21,7 +21,7 @@ def get_create_playlist_side_effect(status_code):
 def get_recos_side_effect(status_code):
 
   # pylint: disable-next=unused-argument
-  def side_effect(track_id, size):
+  def side_effect(track_id, size, verbose=False):
     mock_response = Mock()
     mock_response.status_code = status_code
     raise ClientHTTPError(response=mock_response)
