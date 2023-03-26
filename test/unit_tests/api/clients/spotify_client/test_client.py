@@ -180,3 +180,49 @@ class SpotifyClientTestSuite(unittest.TestCase):
     bearer_token = self._spotify_client.get_bearer_token()
 
     self.assertEqual('Bearer token', bearer_token)
+
+  def test_should_create_sublists_from_track_id_list_with_multiple_sublists(
+      self) -> None:
+    track_ids = [
+        '7Fu7avD3IaqVDprclBEyrM', '78cIbVjU1xn7mbQ9i35avl',
+        '6tSa0K6KMXscRwRQle0HVX', '6dNvZbCd4XOr4pqU76TB3u',
+        '2xXpu16xh9EZAi9o4lCeK6'
+    ]
+
+    track_id_sublists = self._spotify_client.get_track_id_sublists(
+        track_ids=track_ids, sublist_size=2)
+
+    self.assertIsNotNone(track_id_sublists)
+    self.assertEqual(3, len(track_id_sublists))
+
+    track_id_sublist1 = track_id_sublists[0]
+    self.assertIsNotNone(track_id_sublist1)
+    self.assertEqual(['7Fu7avD3IaqVDprclBEyrM', '78cIbVjU1xn7mbQ9i35avl'],
+                     track_id_sublist1)
+
+    track_id_sublist2 = track_id_sublists[1]
+    self.assertIsNotNone(track_id_sublist2)
+    self.assertEqual(['6tSa0K6KMXscRwRQle0HVX', '6dNvZbCd4XOr4pqU76TB3u'],
+                     track_id_sublist2)
+
+    track_id_sublist3 = track_id_sublists[2]
+    self.assertIsNotNone(track_id_sublist3)
+    self.assertEqual(['2xXpu16xh9EZAi9o4lCeK6'], track_id_sublist3)
+
+  def test_should_create_sublist_from_track_id_list_with_singular_sublist(
+      self) -> None:
+    track_ids = [
+        '7Fu7avD3IaqVDprclBEyrM', '78cIbVjU1xn7mbQ9i35avl',
+        '6tSa0K6KMXscRwRQle0HVX', '6dNvZbCd4XOr4pqU76TB3u',
+        '2xXpu16xh9EZAi9o4lCeK6'
+    ]
+
+    track_id_sublists = self._spotify_client.get_track_id_sublists(
+        track_ids=track_ids, sublist_size=50)
+
+    self.assertIsNotNone(track_id_sublists)
+    self.assertEqual(1, len(track_id_sublists))
+
+    track_id_sublist1 = track_id_sublists[0]
+    self.assertIsNotNone(track_id_sublist1)
+    self.assertEqual(track_ids, track_id_sublist1)

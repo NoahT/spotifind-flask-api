@@ -1,10 +1,12 @@
 """ Spotify REST API client module. """
 from abc import ABC, abstractmethod
 from google.cloud import logging_v2
+from requests import exceptions
 from src.api.clients.spotify_auth_client import SpotifyAuthClient
 from src.api.clients.logging_client import LoggingClient
 from src.api.config.config_facade import ConfigFacade
 import json
+import math
 import requests
 
 
@@ -84,6 +86,22 @@ class SpotifyClient(Client):
     return response_json
 
   def v1_tracks_bulk(self, track_ids: list, **kwargs) -> dict:
+    if len(track_ids) == 0:
+      raise exceptions.HTTPError('No track IDs present.')
+
+    track_id_sublists = self.get_track_id_sublists(track_ids=track_ids)
+
+    response = []
+    for track_id_sublist in track_id_sublists:
+      sublist_bulk_response = self.get_v1_tracks_bulk_response(
+          track_ids=track_id_sublist, kwargs=kwargs)
+      response.extend(sublist_bulk_response['tracks'])
+
+    response = {'tracks': response}
+
+    return response
+
+  def get_v1_tracks_bulk_response(self, track_ids: list, **kwargs) -> dict:
     batch = self.logger.batch()
 
     batch.log(f'Making GET call to {self._v1_tracks_bulk_path}',
@@ -209,6 +227,22 @@ class SpotifyClient(Client):
     bearer_token = f'Bearer {bearer_token}'
 
     return bearer_token
+
+  def get_track_id_sublists(self,
+                            track_ids: list,
+                            sublist_size: int = 50) -> list:
+    num_sublists = int(math.ceil(len(track_ids) / sublist_size))
+    track_id_sublists = []
+
+    for i in range(num_sublists):
+      index_low = i * sublist_size
+      index_high = (i + 1) * sublist_size
+      track_id_sublist = track_ids[index_low:index_high]
+      track_id_sublists.append(track_id_sublist)
+
+    print(f'track_id_sublists={track_id_sublists}')
+
+    return track_id_sublists
 
   @property
   def logger(self) -> logging_v2.Logger:
