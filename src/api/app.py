@@ -1,5 +1,6 @@
 """ Module for creating application instance and Blueprints for routing. """
 from flask import Flask, Blueprint
+from flask_cors import CORS
 from .routes.healthcheck import healthcheck
 from src.api.routes import reco, playlist, healthcheck
 from src.api.config import config
@@ -35,6 +36,7 @@ def load_blueprints(app: Flask) -> None:
 
 flask_app = Flask(__name__)
 flask_app.app_context().push()
+CORS(flask_app)
 
 load_xff_proxy_configuration(flask_app)
 load_blueprints(flask_app)

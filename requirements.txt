@@ -8,6 +8,7 @@ coverage==7.1.0
 dill==0.3.6
 flasgger==0.9.5
 Flask==2.2.2
+Flask-Cors==3.0.10
 google-api-core==2.8.2
 google-auth==2.9.0
 google-cloud==0.34.0
